@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">DetectX</string>
+    <string name="request_permissions">request for camera and storage permissions</string>
+    <string name="slogon">Create for Fun!</string>
+</resources>

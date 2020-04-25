@@ -1,0 +1,2 @@
+rootProject.name='DetectX'
+include ':app'

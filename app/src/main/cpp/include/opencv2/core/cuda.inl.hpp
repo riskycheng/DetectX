@@ -343,12 +343,6 @@ bool GpuMat::empty() const
     return data == 0;
 }
 
-inline
-void* GpuMat::cudaPtr() const
-{
-    return data;
-}
-
 static inline
 GpuMat createContinuous(int rows, int cols, int type)
 {

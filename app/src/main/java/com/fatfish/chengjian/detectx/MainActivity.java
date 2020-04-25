@@ -11,11 +11,13 @@ import androidx.core.content.ContextCompat;
 
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.widget.ImageView;
 
 import com.fatfish.chengjian.analyzer.TextAnalyzer;
 import com.fatfish.chengjian.analyzer.UpdateUICallback;
+import com.fatfish.chengjian.utils.JNIManager;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.util.concurrent.Executor;
@@ -28,6 +30,8 @@ public class MainActivity extends AppCompatActivity implements UpdateUICallback 
 
     private TextAnalyzer mTextAnalyzer;
 
+    private JNIManager mJNIManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,6 +40,10 @@ public class MainActivity extends AppCompatActivity implements UpdateUICallback 
         //build the analyzer
         mTextAnalyzer = new TextAnalyzer(this);
         mTextAnalyzer.setUpdateUICallback(this::onAnalysisDone);
+        mJNIManager = JNIManager.getInstance();
+        String rootPath = Environment.getExternalStorageDirectory().getPath();
+        mJNIManager.setupTensorFlowModels(rootPath + "/Jian_Models/MobileSSD_test/MobileNetSSD_deploy.prototxt",
+                rootPath + "/Jian_Models/MobileSSD_test/MobileNetSSD_deploy.caffemodel");
         setupCamera(mTextAnalyzer);
     }
 

@@ -15,11 +15,12 @@ android {
 
         externalNativeBuild {
             cmake {
-                cppFlags "-std=c++11"
+                cppFlags "-frtti -fexceptions -std=c++14 -llog -fpermissive -Wno-deprecated"
+                arguments '-DANDROID_STL=c++_shared'
             }
-        }
-        ndk {
-            abiFilters "arm64-v8a"
+            ndk {
+                abiFilters "arm64-v8a"
+            }
         }
     }
 
@@ -39,6 +40,12 @@ android {
         cmake {
             path "src/main/cpp/CMakeLists.txt"
             version "3.10.2"
+        }
+    }
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['src/main/cpp/']
         }
     }
 

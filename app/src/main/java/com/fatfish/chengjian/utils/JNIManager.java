@@ -1,5 +1,6 @@
 package com.fatfish.chengjian.utils;
 
+import android.graphics.Bitmap;
 import android.util.Log;
 
 public class JNIManager {
@@ -20,8 +21,8 @@ public class JNIManager {
      * @param modelPath
      * @param weightPath
      */
-    public void setupTensorFlowModels(String modelPath, String weightPath) {
-        DNN_initTensorFlowNet(modelPath, weightPath);
+    public void setupCaffeModels(String modelPath, String weightPath) {
+        DNN_initCaffeNet(modelPath, weightPath);
     }
 
     public static JNIManager getInstance() {
@@ -37,6 +38,8 @@ public class JNIManager {
     // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     // bridges to native functions
     // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-    private static native void DNN_initTensorFlowNet(String prototxtPath, String caffePath);
+    private native void DNN_initCaffeNet(String prototxtPath, String caffePath);
+
+    public native void DNN_execute(Bitmap bitmap);
 
 }

@@ -2,19 +2,21 @@ package com.fatfish.chengjian.analyzer;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.media.Image;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.ImageProxy;
 
+import com.fatfish.chengjian.detectx.App;
+import com.fatfish.chengjian.utils.JNIManager;
 import com.fatfish.chengjian.utils.LocalUtils;
 
 public class TextAnalyzer implements ImageAnalysis.Analyzer {
     private final static String TAG = TextAnalyzer.class.getSimpleName();
     private Context mContext;
     private UpdateUICallback mUpdateUICallback;
+    private JNIManager mJNIManager;
 
     public void setUpdateUICallback(UpdateUICallback updateUICallback) {
         mUpdateUICallback = updateUICallback;
@@ -22,6 +24,9 @@ public class TextAnalyzer implements ImageAnalysis.Analyzer {
 
     public TextAnalyzer(@NonNull Context context) {
         mContext = context;
+        mJNIManager = JNIManager.getInstance();
+        mJNIManager.setupCaffeModels(App.MOBILESSD_MODEL_PATH,
+                App.MOBILESSD_WEIGHT_PATH);
     }
 
     @Override
@@ -37,6 +42,9 @@ public class TextAnalyzer implements ImageAnalysis.Analyzer {
         image.close();
 
         bitmap = LocalUtils.rotateBitmap(bitmap, 90);
+
+        mJNIManager.DNN_execute(bitmap);
+
         mUpdateUICallback.onAnalysisDone(bitmap);
     }
 }

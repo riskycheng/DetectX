@@ -31,8 +31,6 @@ public class MainActivity extends AppCompatActivity implements UpdateUICallback 
 
     private TextAnalyzer mTextAnalyzer;
 
-    private JNIManager mJNIManager;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,9 +39,6 @@ public class MainActivity extends AppCompatActivity implements UpdateUICallback 
         //build the analyzer
         mTextAnalyzer = new TextAnalyzer(this);
         mTextAnalyzer.setUpdateUICallback(this::onAnalysisDone);
-        mJNIManager = JNIManager.getInstance();
-        mJNIManager.setupTensorFlowModels(App.MOBILESSD_MODEL_PATH,
-                App.MOBILESSD_WEIGHT_PATH);
         setupCamera(mTextAnalyzer);
     }
 

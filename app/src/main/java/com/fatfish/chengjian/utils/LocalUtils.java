@@ -1,6 +1,7 @@
 package com.fatfish.chengjian.utils;
 
 import android.content.Context;
+import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.media.Image;
@@ -20,7 +21,9 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.util.Vector;
 
 /**
  * description: Element.RGB_888 and Element.RGBA_8888 allocate the same memory, 4 bytes aligned?
@@ -258,47 +261,63 @@ public class LocalUtils {
     }
 
 
-    public static void copyAssetsDirToSDCard(Context context, String assetsDirName, String sdCardPath) {
+    public static Boolean CopyAssetsFile(Context context, String filename, String des) {
+        Boolean isSuccess = true;
+        AssetManager assetManager = context.getAssets();
+        InputStream in = null;
+        OutputStream out = null;
         try {
-            String list[] = context.getAssets().list(assetsDirName);
-            for (String folder : list) {
-                Log.d(TAG, folder);
+            in = assetManager.open(filename);
+            String newFileName = des + "/" + filename;
+            out = new FileOutputStream(newFileName);
+
+            byte[] buffer = new byte[1024];
+            int read;
+            while ((read = in.read(buffer)) != -1) {
+                out.write(buffer, 0, read);
             }
-            if (list.length == 0) {
-                InputStream inputStream = context.getAssets().open(assetsDirName);
-                byte[] mByte = new byte[1024];
-                int bt = 0;
-                File file = new File(sdCardPath + File.separator
-                        + assetsDirName.substring(assetsDirName.lastIndexOf('/')));
-                if (!file.exists()) {
-                    file.createNewFile();
-                } else {
-                    return;
-                }
-                FileOutputStream fos = new FileOutputStream(file);
-                while ((bt = inputStream.read(mByte)) != -1) {
-                    fos.write(mByte, 0, bt);
-                }
-                fos.flush();
-                inputStream.close();
-                fos.close();
-            } else {
-                String subDirName = assetsDirName;
-                if (assetsDirName.contains("/")) {
-                    subDirName = assetsDirName.substring(assetsDirName.lastIndexOf('/') + 1);
-                }
-                sdCardPath = sdCardPath + File.separator + subDirName;
-                File file = new File(sdCardPath);
-                if (!file.exists())
-                    file.mkdirs();
-                for (String s : list) {
-                    copyAssetsDirToSDCard(context, assetsDirName + File.separator + s, sdCardPath);
-                }
-            }
-        } catch (
-                Exception e) {
+            in.close();
+            in = null;
+            out.flush();
+            out.close();
+            out = null;
+        } catch (Exception e) {
             e.printStackTrace();
+            isSuccess = false;
         }
+        return isSuccess;
+    }
+
+
+    public static Boolean CopyAssetsDir(Context context, String src, String des) {
+        Boolean isSuccess = true;
+        String[] files;
+        try {
+            files = context.getResources().getAssets().list(src);
+        } catch (IOException e1) {
+            return false;
+        }
+
+        if (files.length == 0) {
+            isSuccess = CopyAssetsFile(context, src, des);
+            if (!isSuccess)
+                return isSuccess;
+        } else {
+            File srcfile = new File(des + "/" + src);
+            if (!srcfile.exists()) {
+                if (srcfile.mkdir()) {//对于目录自行创建
+                    for (int i = 0; i < files.length; i++) {
+                        isSuccess = CopyAssetsDir(context, src + "/" + files[i], des);
+                        if (!isSuccess)
+                            return isSuccess;
+                    }
+                } else {
+                    return false;
+                }
+            }
+
+        }
+        return isSuccess;
     }
 
     public static boolean checkFileExist(String filePath) {

@@ -17,6 +17,7 @@ import android.widget.ImageView;
 
 import com.fatfish.chengjian.analyzer.TextAnalyzer;
 import com.fatfish.chengjian.analyzer.UpdateUICallback;
+import com.fatfish.chengjian.utils.GlobalConstants;
 import com.fatfish.chengjian.utils.JNIManager;
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -24,7 +25,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity implements UpdateUICallback {
-    private final static String TAG = MainActivity.class.getSimpleName();
+    private final static String TAG = GlobalConstants.JAVA_LOG_PREFIX + MainActivity.class.getSimpleName();
     private ImageView mImageViewDisplay;
     private Camera mCamera;
 
@@ -41,9 +42,8 @@ public class MainActivity extends AppCompatActivity implements UpdateUICallback 
         mTextAnalyzer = new TextAnalyzer(this);
         mTextAnalyzer.setUpdateUICallback(this::onAnalysisDone);
         mJNIManager = JNIManager.getInstance();
-        String rootPath = Environment.getExternalStorageDirectory().getPath();
-        mJNIManager.setupTensorFlowModels(rootPath + "/Jian_Models/MobileSSD_test/MobileNetSSD_deploy.prototxt",
-                rootPath + "/Jian_Models/MobileSSD_test/MobileNetSSD_deploy.caffemodel");
+        mJNIManager.setupTensorFlowModels(App.MOBILESSD_MODEL_PATH,
+                App.MOBILESSD_WEIGHT_PATH);
         setupCamera(mTextAnalyzer);
     }
 

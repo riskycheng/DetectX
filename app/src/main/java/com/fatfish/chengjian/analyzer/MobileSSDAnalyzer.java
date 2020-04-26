@@ -12,8 +12,8 @@ import com.fatfish.chengjian.detectx.App;
 import com.fatfish.chengjian.utils.JNIManager;
 import com.fatfish.chengjian.utils.LocalUtils;
 
-public class TextAnalyzer implements ImageAnalysis.Analyzer {
-    private final static String TAG = TextAnalyzer.class.getSimpleName();
+public class MobileSSDAnalyzer implements ImageAnalysis.Analyzer {
+    private final static String TAG = MobileSSDAnalyzer.class.getSimpleName();
     private Context mContext;
     private UpdateUICallback mUpdateUICallback;
     private JNIManager mJNIManager;
@@ -22,7 +22,7 @@ public class TextAnalyzer implements ImageAnalysis.Analyzer {
         mUpdateUICallback = updateUICallback;
     }
 
-    public TextAnalyzer(@NonNull Context context) {
+    public MobileSSDAnalyzer(@NonNull Context context) {
         mContext = context;
         mJNIManager = JNIManager.getInstance();
         mJNIManager.setupCaffeModels(App.MOBILESSD_MODEL_PATH,

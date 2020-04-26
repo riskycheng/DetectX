@@ -53,6 +53,7 @@ Java_com_fatfish_chengjian_utils_JNIManager_DNN_1initCaffeNet(JNIEnv *env, jobje
     } else {
         LOGI("DNN loaded successfully");
     }
+    g_DNNet.setPreferableTarget(DNN_TARGET_OPENCL_FP16); // it actually does not work for android
     LOGI("exiting %s", __FUNCTION__);
 }
 
@@ -73,12 +74,11 @@ Java_com_fatfish_chengjian_utils_JNIManager_DNN_1execute(JNIEnv *env, jobject cl
     int height = bmapInfo.height;
     int format = bmapInfo.format;
 
-    Mat inputMat = Mat(height, width, CV_8UC4);
-    memcpy(inputMat.data, image, static_cast<size_t>(4 * width * height));
+    Mat inputMat_ = Mat(height, width, CV_8UC4);
+    inputMat_.data = image;
 
-    AndroidBitmap_unlockPixels(env, inputBitmap);
-
-    cvtColor(inputMat, inputMat, COLOR_BGRA2RGB);
+    Mat inputMat;
+    cvtColor(inputMat_, inputMat, COLOR_BGRA2RGB);
 
     //forward image through network
     Mat blob = blobFromImage(inputMat, 1.0 / 127.5, Size(IN_WIDTH, IN_HEIGHT),
@@ -89,14 +89,26 @@ Java_com_fatfish_chengjian_utils_JNIManager_DNN_1execute(JNIEnv *env, jobject cl
 
     Mat detectionMat(detections.size[2], detections.size[3], CV_32F, detections.ptr<float>());
 
-    float confidence_th = 0.2;
     for (int i = 0; i < detectionMat.rows; i++) {
 
         float confidence = detectionMat.at<float>(i, 2);
-        if (confidence > confidence_th) {
+        if (confidence > THRESHOLD) {
             size_t objectClass = (size_t) (detectionMat.at<float>(i, 1));
-            LOGI("detections[%d].conf=%f, class=%s", i, confidence, mobileSSDClasses[objectClass]);
+            LOGI("new detections[%d].conf=%f, class=%s", i, confidence,
+                 mobileSSDClasses[objectClass]);
+            //coordinates
+            int topLeft_x = static_cast<int>(detectionMat.at<float>(i, 3) * width);
+            int topLeft_y = static_cast<int>(detectionMat.at<float>(i, 4) * height);
+            int bottomLeft_x = static_cast<int>(detectionMat.at<float>(i, 5) * width);
+            int bottomLeft_y = static_cast<int>(detectionMat.at<float>(i, 6) * height);
+            rectangle(inputMat_,
+                      Rect(Point(topLeft_x, topLeft_y), Point(bottomLeft_x, bottomLeft_y)),
+                      Scalar(0, 255, 255), 2);
+            putText(inputMat_, mobileSSDClasses[objectClass], Point(topLeft_x, topLeft_y), 1, 1.8,
+                    Scalar(255, 0, 0), 2);
         }
     }
+    AndroidBitmap_unlockPixels(env, inputBitmap);
+    inputMat.release();
     LOGI("exiting %s", __FUNCTION__);
 }

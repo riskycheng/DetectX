@@ -4,21 +4,17 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.camera.core.Camera;
 import androidx.camera.core.CameraSelector;
 import androidx.camera.core.ImageAnalysis;
-import androidx.camera.core.Preview;
 import androidx.camera.lifecycle.ProcessCameraProvider;
-import androidx.camera.view.PreviewView;
 import androidx.core.content.ContextCompat;
 
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.os.Environment;
 import android.util.Log;
 import android.widget.ImageView;
 
-import com.fatfish.chengjian.analyzer.TextAnalyzer;
+import com.fatfish.chengjian.analyzer.MobileSSDAnalyzer;
 import com.fatfish.chengjian.analyzer.UpdateUICallback;
 import com.fatfish.chengjian.utils.GlobalConstants;
-import com.fatfish.chengjian.utils.JNIManager;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.util.concurrent.Executor;
@@ -29,7 +25,7 @@ public class MainActivity extends AppCompatActivity implements UpdateUICallback 
     private ImageView mImageViewDisplay;
     private Camera mCamera;
 
-    private TextAnalyzer mTextAnalyzer;
+    private MobileSSDAnalyzer mobileSSDAnalyzer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,9 +33,9 @@ public class MainActivity extends AppCompatActivity implements UpdateUICallback 
         setContentView(R.layout.activity_main);
         mImageViewDisplay = findViewById(R.id.previewView_Frame);
         //build the analyzer
-        mTextAnalyzer = new TextAnalyzer(this);
-        mTextAnalyzer.setUpdateUICallback(this::onAnalysisDone);
-        setupCamera(mTextAnalyzer);
+        mobileSSDAnalyzer = new MobileSSDAnalyzer(this);
+        mobileSSDAnalyzer.setUpdateUICallback(this::onAnalysisDone);
+        setupCamera(mobileSSDAnalyzer);
     }
 
 

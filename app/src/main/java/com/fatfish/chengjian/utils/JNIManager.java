@@ -7,7 +7,7 @@ public class JNIManager {
     private final String TAG = JNIManager.class.getSimpleName();
 
     static {
-        System.loadLibrary("native-lib");
+        System.loadLibrary("mobileSSD");
     }
 
     private static JNIManager mJNIManager = null;

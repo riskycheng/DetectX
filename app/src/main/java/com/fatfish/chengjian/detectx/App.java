@@ -20,6 +20,6 @@ public class App extends Application {
 
         // the model path for nanodet-plus
         NANODET_PLUS_PARAM_PATH = EXTERNAL_LOCATION_ROOT + "/models/NanodetPlus_m416/nanodet-plus-m_416.param";
-        NANODET_PLUS_BIN_PATH = EXTERNAL_LOCATION_ROOT + "/models/NanodetPlus_m416/anodet-plus-m_416.bin";
+        NANODET_PLUS_BIN_PATH = EXTERNAL_LOCATION_ROOT + "/models/NanodetPlus_m416/nanodet-plus-m_416.bin";
     }
 }

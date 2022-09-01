@@ -80,6 +80,28 @@ int resize_uniform(cv::Mat &src, cv::Mat &dst, cv::Size dst_size, object_rect &e
     return 0;
 }
 
+static const char *class_names[] = {"person", "bicycle", "car", "motorcycle", "airplane", "bus",
+                                    "train", "truck", "boat", "traffic light", "fire hydrant",
+                                    "stop sign", "parking meter", "bench", "bird", "cat", "dog",
+                                    "horse", "sheep", "cow", "elephant", "bear", "zebra",
+                                    "giraffe",
+                                    "backpack", "umbrella", "handbag", "tie", "suitcase",
+                                    "frisbee",
+                                    "skis", "snowboard", "sports ball", "kite", "baseball bat",
+                                    "baseball glove", "skateboard", "surfboard",
+                                    "tennis racket",
+                                    "bottle", "wine glass", "cup", "fork", "knife", "spoon",
+                                    "bowl",
+                                    "banana", "apple", "sandwich", "orange", "broccoli",
+                                    "carrot",
+                                    "hot dog", "pizza", "donut", "cake", "chair", "couch",
+                                    "potted plant", "bed", "dining table", "toilet", "tv",
+                                    "laptop",
+                                    "mouse", "remote", "keyboard", "cell phone", "microwave",
+                                    "oven",
+                                    "toaster", "sink", "refrigerator", "book", "clock", "vase",
+                                    "scissors", "teddy bear", "hair drier", "toothbrush"
+};
 const int color_list[80][3] =
         {
                 //{255 ,255 ,255}, //bg
@@ -166,29 +188,6 @@ const int color_list[80][3] =
         };
 
 void draw_bboxes(const cv::Mat &bgr, const std::vector<BoxInfo> &bboxes, object_rect effect_roi) {
-    static const char *class_names[] = {"person", "bicycle", "car", "motorcycle", "airplane", "bus",
-                                        "train", "truck", "boat", "traffic light", "fire hydrant",
-                                        "stop sign", "parking meter", "bench", "bird", "cat", "dog",
-                                        "horse", "sheep", "cow", "elephant", "bear", "zebra",
-                                        "giraffe",
-                                        "backpack", "umbrella", "handbag", "tie", "suitcase",
-                                        "frisbee",
-                                        "skis", "snowboard", "sports ball", "kite", "baseball bat",
-                                        "baseball glove", "skateboard", "surfboard",
-                                        "tennis racket",
-                                        "bottle", "wine glass", "cup", "fork", "knife", "spoon",
-                                        "bowl",
-                                        "banana", "apple", "sandwich", "orange", "broccoli",
-                                        "carrot",
-                                        "hot dog", "pizza", "donut", "cake", "chair", "couch",
-                                        "potted plant", "bed", "dining table", "toilet", "tv",
-                                        "laptop",
-                                        "mouse", "remote", "keyboard", "cell phone", "microwave",
-                                        "oven",
-                                        "toaster", "sink", "refrigerator", "book", "clock", "vase",
-                                        "scissors", "teddy bear", "hair drier", "toothbrush"
-    };
-
     cv::Mat image = bgr.clone();
     int src_w = image.cols;
     int src_h = image.rows;
@@ -258,9 +257,11 @@ Java_com_fatfish_chengjian_utils_JNIManager_nanoDet_1Detect(JNIEnv *env, jobject
     int width = bmapInfo.width;
     int height = bmapInfo.height;
     int format = bmapInfo.format;
-    LOGI("input image is : ");
 
-    LOGI("Jian >>> 1");
+    int model_height = NanoDet::detector->input_size[0];
+    int model_width = NanoDet::detector->input_size[1];
+
+    LOGI("Jian >>> model-w:%d, h:%d", model_width, model_height);
     Mat image = Mat(height, width, CV_8UC4);
     image.data = imagePtr;
 
@@ -270,11 +271,17 @@ Java_com_fatfish_chengjian_utils_JNIManager_nanoDet_1Detect(JNIEnv *env, jobject
     LOGI("Jian >>> 2");
     object_rect effect_roi;
     cv::Mat resized_img;
-    resize_uniform(tmpMat, resized_img, cv::Size(width, height), effect_roi);
+    resize_uniform(tmpMat, resized_img, cv::Size(model_width, model_height), effect_roi);
     LOGI("Jian >>> 3");
     auto results = NanoDet::detector->detect(resized_img, 0.4, 0.5);
-    LOGI("Jian >>> 4");
+
+    LOGI("Jian detected objects >>> %lu", results.size());
+    for (auto item : results)
+    {
+        LOGI("item:%s, conf:%.2f, x1:%f, y1:%f, x2:%f, y2:%f", class_names[item.label], item.score, item.x1, item.y1, item.x2, item.y2);
+    }
     draw_bboxes(image, results, effect_roi);
+    rectangle(image, Point(100, 100), Point(200, 200), Scalar(255, 0, 0));
     AndroidBitmap_unlockPixels(env, inputBitmap);
     tmpMat.release();
     LOGI("exiting %s", __FUNCTION__);

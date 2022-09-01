@@ -73,8 +73,10 @@ NanoDet::NanoDet(const char* param, const char* bin, bool useGPU)
 #if NCNN_VULKAN
     this->hasGPU = ncnn::get_gpu_count() > 0;
 #endif
-    this->Net->opt.use_vulkan_compute = this->hasGPU && useGPU;
+    this->Net->opt.use_vulkan_compute = false; //hasGPU && useGPU;  // gpu
     this->Net->opt.use_fp16_arithmetic = true;
+    this->Net->opt.use_fp16_packed = true;
+    this->Net->opt.use_fp16_storage = true;
     this->Net->load_param(param);
     this->Net->load_model(bin);
 }

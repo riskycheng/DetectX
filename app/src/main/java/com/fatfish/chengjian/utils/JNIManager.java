@@ -8,6 +8,7 @@ public class JNIManager {
 
     static {
         System.loadLibrary("mobileSSD");
+        System.loadLibrary("nanodet");
     }
 
     private static JNIManager mJNIManager = null;
@@ -25,6 +26,9 @@ public class JNIManager {
         DNN_initCaffeNet(modelPath, weightPath);
     }
 
+    public void setupNanodetModels(String paramPath, String binPath){
+        nanoDet_Init(paramPath, binPath);
+    }
     public static JNIManager getInstance() {
         if (mJNIManager == null)
             mJNIManager = new JNIManager();
@@ -41,5 +45,12 @@ public class JNIManager {
     private native void DNN_initCaffeNet(String prototxtPath, String caffePath);
 
     public native void DNN_execute(Bitmap bitmap);
+
+    // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    // bridges to native functions of NanoDet-Plus
+    // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    private native void nanoDet_Init(String modelParamPath, String modelBinPath);
+
+    public native void nanoDet_Detect(Bitmap bitmap);
 
 }

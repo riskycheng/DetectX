@@ -13,6 +13,7 @@ import android.util.Log;
 import android.widget.ImageView;
 
 import com.fatfish.chengjian.analyzer.MobileSSDAnalyzer;
+import com.fatfish.chengjian.analyzer.NanodetPlusAnalyzer;
 import com.fatfish.chengjian.analyzer.UpdateUICallback;
 import com.fatfish.chengjian.utils.GlobalConstants;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -26,6 +27,7 @@ public class MainActivity extends AppCompatActivity implements UpdateUICallback 
     private Camera mCamera;
 
     private MobileSSDAnalyzer mobileSSDAnalyzer;
+    private NanodetPlusAnalyzer nanodetPlusAnalyzer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,8 +36,10 @@ public class MainActivity extends AppCompatActivity implements UpdateUICallback 
         mImageViewDisplay = findViewById(R.id.previewView_Frame);
         //build the analyzer
         mobileSSDAnalyzer = new MobileSSDAnalyzer(this);
-        mobileSSDAnalyzer.setUpdateUICallback(this::onAnalysisDone);
-        setupCamera(mobileSSDAnalyzer);
+        mobileSSDAnalyzer.setUpdateUICallback(this);
+        nanodetPlusAnalyzer = new NanodetPlusAnalyzer(this);
+        nanodetPlusAnalyzer.setUpdateUICallback(this);
+        setupCamera(nanodetPlusAnalyzer);
     }
 
 

@@ -21,6 +21,7 @@ find_package(ncnn REQUIRED)
 add_library( # Sets the name of the library.
         nanodet
         SHARED
+        nativeNanodet.cpp
         nanodet.cpp)
 
 

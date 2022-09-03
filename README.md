@@ -24,7 +24,7 @@ it takes around 0.2s in pure CPU mode with ncnn on SnapDragon-888.
 
 ## references
 ### benchmark from nanoDet
-## Benchmarks
+#### Benchmarks
 
 Model          |Resolution| mAP<sup>val<br>0.5:0.95 |CPU Latency<sup><br>(i7-8700) |ARM Latency<sup><br>(4xA76) | FLOPS      |   Params  | Model Size
 :-------------:|:--------:|:-------:|:--------------------:|:--------------------:|:----------:|:---------:|:-------:

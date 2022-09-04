@@ -10,6 +10,8 @@ public class App extends Application {
     public static String MOBILESSD_WEIGHT_PATH = "";
     public static String NANODET_PLUS_PARAM_PATH = "";
     public static String NANODET_PLUS_BIN_PATH = "";
+    public static String NANODET_PLUS_LEAF_PARAM_PATH = "";
+    public static String NANODET_PLUS_LEAF_BIN_PATH = "";
     @Override
     public void onCreate() {
         super.onCreate();
@@ -21,5 +23,9 @@ public class App extends Application {
         // the model path for nanodet-plus
         NANODET_PLUS_PARAM_PATH = EXTERNAL_LOCATION_ROOT + "/models/NanodetPlus_m416/nanodet-plus-m_416.param";
         NANODET_PLUS_BIN_PATH = EXTERNAL_LOCATION_ROOT + "/models/NanodetPlus_m416/nanodet-plus-m_416.bin";
+
+        // he model path for nanodet-plus-leaf
+        NANODET_PLUS_LEAF_PARAM_PATH = EXTERNAL_LOCATION_ROOT + "/models/NanodetPlus_m416_leafDet/nanodet_leaf.param";
+        NANODET_PLUS_LEAF_BIN_PATH = EXTERNAL_LOCATION_ROOT + "/models/NanodetPlus_m416_leafDet/nanodet_leaf.bin";
     }
 }

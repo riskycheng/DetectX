@@ -9,6 +9,7 @@ public class JNIManager {
     static {
         System.loadLibrary("mobileSSD");
         System.loadLibrary("nanodet");
+        System.loadLibrary("nanodet_leaf");
     }
 
     private static JNIManager mJNIManager = null;
@@ -26,17 +27,11 @@ public class JNIManager {
         DNN_initCaffeNet(modelPath, weightPath);
     }
 
-    public void setupNanodetModels(String paramPath, String binPath){
-        nanoDet_Init(paramPath, binPath);
-    }
     public static JNIManager getInstance() {
         if (mJNIManager == null)
             mJNIManager = new JNIManager();
         return mJNIManager;
     }
-
-
-
 
 
     // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -49,8 +44,15 @@ public class JNIManager {
     // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     // bridges to native functions of NanoDet-Plus
     // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-    private native void nanoDet_Init(String modelParamPath, String modelBinPath);
+    public native void nanoDet_Init(String modelParamPath, String modelBinPath);
 
     public native void nanoDet_Detect(Bitmap bitmap);
+
+    // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    // bridges to native functions of NanoDet-Plus for leaf detection
+    // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    public native void nanoDetLeaf_Init(String modelParamPath, String modelBinPath);
+
+    public native void nanoDetLeaf_Detect(Bitmap bitmap);
 
 }

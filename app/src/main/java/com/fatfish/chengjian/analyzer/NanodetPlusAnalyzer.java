@@ -25,7 +25,7 @@ public class NanodetPlusAnalyzer implements ImageAnalysis.Analyzer {
     public NanodetPlusAnalyzer(@NonNull Context context) {
         mContext = context;
         mJNIManager = JNIManager.getInstance();
-        mJNIManager.setupNanodetModels(App.NANODET_PLUS_PARAM_PATH,
+        mJNIManager.nanoDet_Init(App.NANODET_PLUS_PARAM_PATH,
                 App.NANODET_PLUS_BIN_PATH);
     }
 

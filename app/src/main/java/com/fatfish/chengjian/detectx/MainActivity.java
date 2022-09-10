@@ -38,11 +38,11 @@ public class MainActivity extends AppCompatActivity implements UpdateUICallback 
         //build the any of the following analyzer
         mobileSSDAnalyzer = new MobileSSDAnalyzer(this);
         mobileSSDAnalyzer.setUpdateUICallback(this);
-        nanodetPlusAnalyzer = new NanodetPlusAnalyzer(this);
-        nanodetPlusAnalyzer.setUpdateUICallback(this);
-//        nanodetPlusLeafAnalyzer = new NanodetPlusLeafAnalyzer(this);
-//        nanodetPlusLeafAnalyzer.setUpdateUICallback(this);
-        setupCamera(nanodetPlusAnalyzer);
+//        nanodetPlusAnalyzer = new NanodetPlusAnalyzer(this);
+//        nanodetPlusAnalyzer.setUpdateUICallback(this);
+        nanodetPlusLeafAnalyzer = new NanodetPlusLeafAnalyzer(this);
+        nanodetPlusLeafAnalyzer.setUpdateUICallback(this);
+        setupCamera(nanodetPlusLeafAnalyzer);
     }
 
 

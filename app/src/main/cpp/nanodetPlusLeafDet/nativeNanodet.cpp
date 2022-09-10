@@ -16,7 +16,7 @@ using namespace cv;
 #define  LOG_TAG    "Jian_nanoDet_JNI"
 #define  LOGI(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
 #define  LOGE(...)  __android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__)
-
+#define ENABLE_GRABCUT
 
 struct object_rect {
     int x;
@@ -81,7 +81,20 @@ int resize_uniform(cv::Mat &src, cv::Mat &dst, cv::Size dst_size, object_rect &e
 }
 
 
-void draw_bboxes(const cv::Mat &image, const std::vector<BoxInfo> &bboxes, object_rect effect_roi) {
+Mat grabCutRes(Mat &src, cv::Rect rect)
+{
+    cv::Mat mask = cv::Mat::zeros(src.rows, src.cols, CV_8UC1);
+    cv::Mat bgModel = cv::Mat::zeros(1, 65, CV_64FC1);
+    cv::Mat fgModel = cv::Mat::zeros(1, 65, CV_64FC1);
+
+    cv::grabCut(src, mask, rect, bgModel, fgModel, 2, cv::GC_INIT_WITH_RECT);
+    cv::Mat mask2 = (mask == 1) + (mask == 3);  // 0 = cv::GC_BGD, 1 = cv::GC_FGD, 2 = cv::PR_BGD, 3 = cv::GC_PR_FGD
+    cv::Mat dest;
+    src.copyTo(dest, mask2);
+    return dest;
+}
+
+void draw_bboxes(cv::Mat &image, const std::vector<BoxInfo> &bboxes, object_rect effect_roi) {
     int src_w = image.cols;
     int src_h = image.rows;
     int dst_w = effect_roi.width;
@@ -92,11 +105,21 @@ void draw_bboxes(const cv::Mat &image, const std::vector<BoxInfo> &bboxes, objec
     for (const auto & box : bboxes) {
         cv::Scalar color = cv::Scalar(color_list[box.label][0], color_list[box.label][1],
                                       color_list[box.label][2]);
-
-        cv::rectangle(image, cv::Rect(cv::Point(int((box.x1 - (float)effect_roi.x) * width_ratio),
-                                                int((box.y1 - (float)effect_roi.y) * height_ratio)),
-                                      cv::Point(int((box.x2 - (float)effect_roi.x) * width_ratio),
-                                                    int((box.y2 - (float)effect_roi.y) * height_ratio))), color);
+        cv::Rect rect = cv::Rect(cv::Point(int((box.x1 - (float)effect_roi.x) * width_ratio),
+                                           int((box.y1 - (float)effect_roi.y) * height_ratio)),
+                                 cv::Point(int((box.x2 - (float)effect_roi.x) * width_ratio),
+                                           int((box.y2 - (float)effect_roi.y) * height_ratio)));
+#ifdef ENABLE_GRABCUT
+        if (box.label == 1) {
+            auto tmpMat = image(rect); // the cropped ROI for segmentation
+            cvtColor(tmpMat, tmpMat, COLOR_RGBA2BGR);
+            auto tmpMatSeg = grabCutRes(tmpMat, cv::Rect(0, 0, tmpMat.cols - 1, tmpMat.rows - 1));
+            //small_image.copyTo(big_image(cv::Rect(x,y,small_image.cols, small_image.rows)));
+            cvtColor(tmpMatSeg, tmpMatSeg, COLOR_BGR2RGBA);
+            tmpMatSeg.copyTo(image(rect));
+        }
+#endif
+        cv::rectangle(image, rect, color);
 
         char text[256];
         sprintf(text, "%s %.1f%%", class_names[box.label], box.score * 100);
@@ -157,7 +180,6 @@ Java_com_fatfish_chengjian_utils_JNIManager_nanoDetLeaf_1Detect(JNIEnv *env, job
     cv::Mat resized_img;
     resize_uniform(tmpMat, resized_img, cv::Size(model_width, model_height), effect_roi);
     auto results = NanoDet::detector->detect(resized_img, 0.4, 0.5);
-
     draw_bboxes(image, results, effect_roi);
     AndroidBitmap_unlockPixels(env, inputBitmap);
     tmpMat.release();

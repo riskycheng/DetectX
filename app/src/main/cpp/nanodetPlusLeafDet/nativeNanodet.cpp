@@ -87,7 +87,7 @@ Mat grabCutRes(Mat &src, cv::Rect rect)
     cv::Mat bgModel = cv::Mat::zeros(1, 65, CV_64FC1);
     cv::Mat fgModel = cv::Mat::zeros(1, 65, CV_64FC1);
 
-    cv::grabCut(src, mask, rect, bgModel, fgModel, 2, cv::GC_INIT_WITH_RECT);
+    cv::grabCut(src, mask, rect, bgModel, fgModel, 4, cv::GC_INIT_WITH_RECT);
     cv::Mat mask2 = (mask == 1) + (mask == 3);  // 0 = cv::GC_BGD, 1 = cv::GC_FGD, 2 = cv::PR_BGD, 3 = cv::GC_PR_FGD
     cv::Mat dest;
     src.copyTo(dest, mask2);
@@ -109,6 +109,18 @@ void draw_bboxes(cv::Mat &image, const std::vector<BoxInfo> &bboxes, object_rect
                                            int((box.y1 - (float)effect_roi.y) * height_ratio)),
                                  cv::Point(int((box.x2 - (float)effect_roi.x) * width_ratio),
                                            int((box.y2 - (float)effect_roi.y) * height_ratio)));
+       float scaleFactor = 1.2f;
+       int newWidth = rect.width * scaleFactor;
+       int newHeight = rect.height * scaleFactor;
+       int centerX = rect.x + rect.width / 2;
+       int centerY = rect.y + rect.height / 2;
+       int newX = max(0, (centerX - newWidth / 2));
+       int newY = min(image.rows - 1, (centerY - newHeight / 2));
+       // assign back
+       rect.x = min(image.cols - 1, max(0, newX));
+       rect.y = min(image.rows - 1, max(0, newY));
+       rect.width = min(image.cols - 1, max(0, newWidth));
+       rect.height = min(image.rows - 1, max(0, newHeight));
 #ifdef ENABLE_GRABCUT
         if (box.label == 1) {
             auto tmpMat = image(rect); // the cropped ROI for segmentation

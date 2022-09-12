@@ -10,6 +10,7 @@ import androidx.core.content.ContextCompat;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.Size;
 import android.widget.ImageView;
 
 import com.fatfish.chengjian.analyzer.MobileSSDAnalyzer;
@@ -30,6 +31,7 @@ public class MainActivity extends AppCompatActivity implements UpdateUICallback 
     private MobileSSDAnalyzer mobileSSDAnalyzer;
     private NanodetPlusAnalyzer nanodetPlusAnalyzer;
     private NanodetPlusLeafAnalyzer nanodetPlusLeafAnalyzer;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,7 +76,9 @@ public class MainActivity extends AppCompatActivity implements UpdateUICallback 
 
 
     public ImageAnalysis buildAnalyzer(ImageAnalysis.Analyzer analyzer) {
-        ImageAnalysis resAnalyzer = new ImageAnalysis.Builder().build();
+        ImageAnalysis resAnalyzer = new ImageAnalysis.Builder()
+                .setTargetResolution(new Size(720, 1280))
+                .build();
         Executor imageAnalyzerExecutor = Executors.newSingleThreadExecutor();
         resAnalyzer.setAnalyzer(imageAnalyzerExecutor, analyzer);
         return resAnalyzer;

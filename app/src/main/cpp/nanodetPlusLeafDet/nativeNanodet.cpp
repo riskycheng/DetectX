@@ -10,13 +10,16 @@
 #include <fstream>
 #include <sstream>
 #include <android/bitmap.h>
+#include <vector>
 #include "nanodet.h"
 #include "classNamesColors.h"
+using namespace std;
 using namespace cv;
 #define  LOG_TAG    "Jian_nanoDet_JNI"
 #define  LOGI(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
 #define  LOGE(...)  __android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__)
-#define ENABLE_GRABCUT
+//#define ENABLE_GRABCUT
+#define ENABLE_CANNY
 
 struct object_rect {
     int x;
@@ -80,19 +83,78 @@ int resize_uniform(cv::Mat &src, cv::Mat &dst, cv::Size dst_size, object_rect &e
     return 0;
 }
 
-
-Mat grabCutRes(Mat &src, cv::Rect rect)
-{
+//GC_BGD    = 0,  //背景
+//GC_FGD    = 1,  //前景
+//GC_PR_BGD = 2,  //可能背景
+//GC_PR_FGD = 3   //可能前景
+Mat grabCutRes(Mat &src, cv::Rect rect, float centroidRatio) {
+    // known FGD is the pre-condition trick here: we know the centroid rect is definitely the foreground
+    auto centerX = rect.x + rect.width / 2;
+    auto centerY = rect.y + rect.height / 2;
+    auto stretchW = rect.width * centroidRatio;
+    auto stretchH = rect.height * centroidRatio;
+    auto newX1 = centerX - stretchW / 2;
+    auto newY1 = centerY - stretchH / 2;
+    auto newX2 = min((int) (rect.x + rect.width - 1), (int) (newX1 + stretchW));
+    auto newY2 = min((int) (rect.y + rect.height - 1), (int) (newY1 + stretchH));
     cv::Mat mask = cv::Mat::zeros(src.rows, src.cols, CV_8UC1);
     cv::Mat bgModel = cv::Mat::zeros(1, 65, CV_64FC1);
     cv::Mat fgModel = cv::Mat::zeros(1, 65, CV_64FC1);
+    LOGI("Jian-Debug >>>newX1:%f, Y:%f stretchW:%f, H:%f", newX1, newY1, stretchW, stretchH);
+    cv::Mat knownFGDMat = cv::Mat::ones(stretchH, stretchW, CV_8UC1);
+    cv::Rect knownFGDRect(newX1, newY1, stretchW, stretchH);
+    knownFGDMat.copyTo(mask(knownFGDRect));
 
     cv::grabCut(src, mask, rect, bgModel, fgModel, 4, cv::GC_INIT_WITH_RECT);
-    cv::Mat mask2 = (mask == 1) + (mask == 3);  // 0 = cv::GC_BGD, 1 = cv::GC_FGD, 2 = cv::PR_BGD, 3 = cv::GC_PR_FGD
+    cv::Mat mask2 = (mask == 1) + (mask ==
+                                   3);  // 0 = cv::GC_BGD, 1 = cv::GC_FGD, 2 = cv::PR_BGD, 3 = cv::GC_PR_FGD
     cv::Mat dest;
     src.copyTo(dest, mask2);
     return dest;
 }
+
+// the src in grayScaled
+void CannyThreshold(Mat &src)
+{
+    cv::Mat binaryMat, grayMat;
+    cvtColor(src, grayMat, COLOR_RGBA2GRAY);
+    cv::threshold(grayMat, binaryMat, 127, 255, cv::THRESH_BINARY_INV);
+
+//    Mat image, binaryMat;
+//    GaussianBlur(src, image, Size(3, 3), 0);
+//    Canny(image, binaryMat, 100, 255);
+
+    // find contours
+    vector<vector<Point>> contours;
+    vector<Vec4i> hierarchy;
+    findContours(binaryMat, contours, hierarchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_NONE, Point());
+    vector<int> validContourIndexes;
+    for (int i = 0; i < contours.size(); i++)
+    {
+        auto contour = contours[i];
+        auto contourSize = contour.size();
+        if (contourSize < 300)
+            continue;
+        validContourIndexes.push_back(i);
+    }
+    vector<int> validContourIndexesAfterFiltering;
+    for (int i  = 0; i < validContourIndexes.size(); i++)
+    {
+        auto index = validContourIndexes[i];
+        auto hierarchyItem = hierarchy[index];
+        LOGE("hierarchyItem[%d]: [%d, %d, %d, %d]", index, hierarchyItem[0], hierarchyItem[1], hierarchyItem[2], hierarchyItem[3]);
+//        if (hierarchyItem[1] == -1)
+//            continue;
+        validContourIndexesAfterFiltering.push_back(index);
+    }
+
+    if (validContourIndexes.size() == 1)
+        validContourIndexesAfterFiltering.push_back(validContourIndexes[0]);
+
+    for (int i = 0; i < validContourIndexesAfterFiltering.size(); i++)
+        drawContours(src, contours, validContourIndexesAfterFiltering[i],  Scalar(255, 0, 0, 255), 6, 8, hierarchy);
+}
+
 
 void draw_bboxes(cv::Mat &image, const std::vector<BoxInfo> &bboxes, object_rect effect_roi) {
     int src_w = image.cols;
@@ -102,33 +164,40 @@ void draw_bboxes(cv::Mat &image, const std::vector<BoxInfo> &bboxes, object_rect
     float width_ratio = (float) src_w / (float) dst_w;
     float height_ratio = (float) src_h / (float) dst_h;
 
-    for (const auto & box : bboxes) {
+    for (const auto &box: bboxes) {
         cv::Scalar color = cv::Scalar(color_list[box.label][0], color_list[box.label][1],
                                       color_list[box.label][2]);
-        cv::Rect rect = cv::Rect(cv::Point(int((box.x1 - (float)effect_roi.x) * width_ratio),
-                                           int((box.y1 - (float)effect_roi.y) * height_ratio)),
-                                 cv::Point(int((box.x2 - (float)effect_roi.x) * width_ratio),
-                                           int((box.y2 - (float)effect_roi.y) * height_ratio)));
-       float scaleFactor = 1.2f;
-       int newWidth = rect.width * scaleFactor;
-       int newHeight = rect.height * scaleFactor;
-       int centerX = rect.x + rect.width / 2;
-       int centerY = rect.y + rect.height / 2;
-       int newX = max(0, (centerX - newWidth / 2));
-       int newY = min(image.rows - 1, (centerY - newHeight / 2));
-       // assign back
-       rect.x = min(image.cols - 1, max(0, newX));
-       rect.y = min(image.rows - 1, max(0, newY));
-       rect.width = min(image.cols - 1, max(0, newWidth));
-       rect.height = min(image.rows - 1, max(0, newHeight));
+        cv::Rect rect = cv::Rect(cv::Point(int((box.x1 - (float) effect_roi.x) * width_ratio),
+                                           int((box.y1 - (float) effect_roi.y) * height_ratio)),
+                                 cv::Point(int((box.x2 - (float) effect_roi.x) * width_ratio),
+                                           int((box.y2 - (float) effect_roi.y) * height_ratio)));
+        float scaleFactor = 1.2f;
+        int newWidth = rect.width * scaleFactor;
+        int newHeight = rect.height * scaleFactor;
+        int centerX = rect.x + rect.width / 2;
+        int centerY = rect.y + rect.height / 2;
+        int newX = max(0, (centerX - newWidth / 2));
+        int newY = min(image.rows - 1, (centerY - newHeight / 2));
+        // assign back
+        rect.x = min(image.cols - 1, max(0, newX));
+        rect.y = min(image.rows - 1, max(0, newY));
+        rect.width = min(image.cols - 1, max(0, newWidth));
+        rect.height = min(image.rows - 1, max(0, newHeight));
 #ifdef ENABLE_GRABCUT
         if (box.label == 1) {
             auto tmpMat = image(rect); // the cropped ROI for segmentation
             cvtColor(tmpMat, tmpMat, COLOR_RGBA2BGR);
-            auto tmpMatSeg = grabCutRes(tmpMat, cv::Rect(0, 0, tmpMat.cols - 1, tmpMat.rows - 1));
+            auto tmpMatSeg = grabCutRes(tmpMat, cv::Rect(0, 0, tmpMat.cols - 1, tmpMat.rows - 1), 0.3f);
             //small_image.copyTo(big_image(cv::Rect(x,y,small_image.cols, small_image.rows)));
             cvtColor(tmpMatSeg, tmpMatSeg, COLOR_BGR2RGBA);
             tmpMatSeg.copyTo(image(rect));
+        }
+#endif
+#ifdef ENABLE_CANNY
+        if (box.label == 1) {
+            auto tmpMat = image(rect); // the cropped ROI for segmentation
+            CannyThreshold(tmpMat);
+            tmpMat.copyTo(image(rect));
         }
 #endif
         cv::rectangle(image, rect, color);
@@ -139,8 +208,9 @@ void draw_bboxes(cv::Mat &image, const std::vector<BoxInfo> &bboxes, object_rect
         int baseLine = 0;
         cv::Size label_size = cv::getTextSize(text, cv::FONT_HERSHEY_SIMPLEX, 0.4, 1, &baseLine);
 
-        int x = (int)((box.x1 - (float)effect_roi.x) * width_ratio);
-        int y = (int)((box.y1 - (float)effect_roi.y) * height_ratio) - label_size.height - baseLine;
+        int x = (int) ((box.x1 - (float) effect_roi.x) * width_ratio);
+        int y = (int) ((box.y1 - (float) effect_roi.y) * height_ratio) - label_size.height -
+                baseLine;
         if (y < 0)
             y = 0;
         if (x + label_size.width > image.cols)
@@ -154,8 +224,8 @@ void draw_bboxes(cv::Mat &image, const std::vector<BoxInfo> &bboxes, object_rect
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_fatfish_chengjian_utils_JNIManager_nanoDetLeaf_1Init(JNIEnv *env, jobject thiz,
-                                                          jstring modelParamPath,
-                                                          jstring modelBinPath) {
+                                                              jstring modelParamPath,
+                                                              jstring modelBinPath) {
 
     LOGI("entering %s", __FUNCTION__);
     const char *paramPath = strdup(env->GetStringUTFChars(modelParamPath, nullptr));
@@ -167,7 +237,7 @@ Java_com_fatfish_chengjian_utils_JNIManager_nanoDetLeaf_1Init(JNIEnv *env, jobje
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_fatfish_chengjian_utils_JNIManager_nanoDetLeaf_1Detect(JNIEnv *env, jobject thiz,
-                                                            jobject inputBitmap) {
+                                                                jobject inputBitmap) {
     LOGI("entering %s", __FUNCTION__);
     uint32_t *_inputBitmap;
     AndroidBitmapInfo bmapInfo;
@@ -182,7 +252,7 @@ Java_com_fatfish_chengjian_utils_JNIManager_nanoDetLeaf_1Detect(JNIEnv *env, job
     int model_height = NanoDet::detector->input_size[0];
     int model_width = NanoDet::detector->input_size[1];
 
-    Mat image = Mat((int)height, (int)width, CV_8UC4);
+    Mat image = Mat((int) height, (int) width, CV_8UC4);
     image.data = imagePtr;
 
     Mat tmpMat;

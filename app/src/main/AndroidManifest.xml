@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.fatfish.chengjian.detectx">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -18,7 +18,9 @@
             android:theme="@style/MyFullScreenTheme"></activity>
         <activity
             android:name=".LauncherActivity"
-            android:theme="@style/MyFullScreenTheme">
+            android:exported="true"
+            android:theme="@style/MyFullScreenTheme"
+            tools:node="merge">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

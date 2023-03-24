@@ -1,13 +1,12 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 32
-    buildToolsVersion "29.0.2"
+    compileSdkVersion 30
 
     defaultConfig {
         applicationId "com.fatfish.chengjian.detectx"
         minSdkVersion 24
-        targetSdkVersion 32
+        targetSdkVersion 30
         versionCode 1
         versionName "1.0"
 
@@ -31,10 +30,6 @@ android {
         }
     }
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
 
     externalNativeBuild {
         cmake {
@@ -49,6 +44,11 @@ android {
     }
 
     ndkVersion "21.3.6528147"
+    namespace 'com.fatfish.chengjian.detectx'
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
 }
 
 dependencies {

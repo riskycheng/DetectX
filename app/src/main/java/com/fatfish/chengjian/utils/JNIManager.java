@@ -10,6 +10,7 @@ public class JNIManager {
         System.loadLibrary("mobileSSD");
         System.loadLibrary("nanodet");
         System.loadLibrary("nanodet_leaf");
+        System.loadLibrary("nanodet_door");
     }
 
     private static JNIManager mJNIManager = null;
@@ -54,5 +55,8 @@ public class JNIManager {
     public native void nanoDetLeaf_Init(String modelParamPath, String modelBinPath);
 
     public native void nanoDetLeaf_Detect(Bitmap bitmap);
+
+    public native void nanoDetDoor_Init(String modelParamPath, String modelBinPath);
+    public native void nanoDetDoor_Detect(Bitmap bitmap);
 
 }

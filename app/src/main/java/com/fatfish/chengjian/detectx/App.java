@@ -12,6 +12,9 @@ public class App extends Application {
     public static String NANODET_PLUS_BIN_PATH = "";
     public static String NANODET_PLUS_LEAF_PARAM_PATH = "";
     public static String NANODET_PLUS_LEAF_BIN_PATH = "";
+
+    public static String NANODET_PLUS_DOOR_PARAM_PATH = "";
+    public static String NANODET_PLUS_DOOR_BIN_PATH = "";
     @Override
     public void onCreate() {
         super.onCreate();
@@ -24,8 +27,12 @@ public class App extends Application {
         NANODET_PLUS_PARAM_PATH = EXTERNAL_LOCATION_ROOT + "/models/NanodetPlus_m416/nanodet-plus-m_416.param";
         NANODET_PLUS_BIN_PATH = EXTERNAL_LOCATION_ROOT + "/models/NanodetPlus_m416/nanodet-plus-m_416.bin";
 
-        // he model path for nanodet-plus-leaf
+        // the model path for nanodet-plus-leaf
         NANODET_PLUS_LEAF_PARAM_PATH = EXTERNAL_LOCATION_ROOT + "/models/NanodetPlus_m416_leafDet/nanodet_leaf.param";
         NANODET_PLUS_LEAF_BIN_PATH = EXTERNAL_LOCATION_ROOT + "/models/NanodetPlus_m416_leafDet/nanodet_leaf.bin";
+
+        // the model path for nanodet-plus-door
+        NANODET_PLUS_DOOR_PARAM_PATH = EXTERNAL_LOCATION_ROOT + "/models/NanodetPlus_m416_doorDet/nanodet_door.param";
+        NANODET_PLUS_DOOR_BIN_PATH = EXTERNAL_LOCATION_ROOT + "/models/NanodetPlus_m416_doorDet/nanodet_door.bin";
     }
 }

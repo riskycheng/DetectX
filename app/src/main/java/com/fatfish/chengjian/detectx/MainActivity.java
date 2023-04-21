@@ -15,6 +15,7 @@ import android.widget.ImageView;
 
 import com.fatfish.chengjian.analyzer.MobileSSDAnalyzer;
 import com.fatfish.chengjian.analyzer.NanodetPlusAnalyzer;
+import com.fatfish.chengjian.analyzer.NanodetPlusDoorAnalyzer;
 import com.fatfish.chengjian.analyzer.NanodetPlusLeafAnalyzer;
 import com.fatfish.chengjian.analyzer.UpdateUICallback;
 import com.fatfish.chengjian.utils.GlobalConstants;
@@ -31,6 +32,7 @@ public class MainActivity extends AppCompatActivity implements UpdateUICallback 
     private MobileSSDAnalyzer mobileSSDAnalyzer;
     private NanodetPlusAnalyzer nanodetPlusAnalyzer;
     private NanodetPlusLeafAnalyzer nanodetPlusLeafAnalyzer;
+    private NanodetPlusDoorAnalyzer nanodetPlusDoorAnalyzer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,9 +44,12 @@ public class MainActivity extends AppCompatActivity implements UpdateUICallback 
         mobileSSDAnalyzer.setUpdateUICallback(this);
 //        nanodetPlusAnalyzer = new NanodetPlusAnalyzer(this);
 //        nanodetPlusAnalyzer.setUpdateUICallback(this);
-        nanodetPlusLeafAnalyzer = new NanodetPlusLeafAnalyzer(this);
-        nanodetPlusLeafAnalyzer.setUpdateUICallback(this);
-        setupCamera(nanodetPlusLeafAnalyzer);
+//        nanodetPlusLeafAnalyzer = new NanodetPlusLeafAnalyzer(this);
+//        nanodetPlusLeafAnalyzer.setUpdateUICallback(this);
+
+        nanodetPlusDoorAnalyzer = new NanodetPlusDoorAnalyzer(this);
+        nanodetPlusDoorAnalyzer.setUpdateUICallback(this);
+        setupCamera(nanodetPlusDoorAnalyzer);
     }
 
 

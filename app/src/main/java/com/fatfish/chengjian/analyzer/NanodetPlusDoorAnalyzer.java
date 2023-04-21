@@ -40,7 +40,7 @@ public class NanodetPlusDoorAnalyzer implements ImageAnalysis.Analyzer {
         //need to close it
         image.close();
 
-        bitmap = LocalUtils.rotateBitmap(bitmap, 90);
+//        bitmap = LocalUtils.rotateBitmap(bitmap, 90); // no need to perform rotation
 
         mJNIManager.nanoDetDoor_Detect(bitmap);
 

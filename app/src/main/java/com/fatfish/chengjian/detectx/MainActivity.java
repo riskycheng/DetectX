@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity implements UpdateUICallback 
 
     public void setupCamera(ImageAnalysis.Analyzer analyzer) {
         final CameraSelector cameraSelector = new CameraSelector.Builder()
-                .requireLensFacing(CameraSelector.LENS_FACING_BACK)
+                .requireLensFacing(CameraSelector.LENS_FACING_FRONT) // specially for the Logi camera RK3588
                 .build();
         final ListenableFuture cameraProviderFuture = ProcessCameraProvider.getInstance(this);
         cameraProviderFuture.addListener(new Runnable() {
@@ -82,7 +82,7 @@ public class MainActivity extends AppCompatActivity implements UpdateUICallback 
 
     public ImageAnalysis buildAnalyzer(ImageAnalysis.Analyzer analyzer) {
         ImageAnalysis resAnalyzer = new ImageAnalysis.Builder()
-                .setTargetResolution(new Size(720, 1280))
+                .setTargetResolution(new Size(1920, 1080))
                 .build();
         Executor imageAnalyzerExecutor = Executors.newSingleThreadExecutor();
         resAnalyzer.setAnalyzer(imageAnalyzerExecutor, analyzer);

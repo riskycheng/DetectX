@@ -12,6 +12,7 @@
 #include <android/bitmap.h>
 #include "nanodet.h"
 #include "classNamesColors.h"
+
 using namespace cv;
 #define  LOG_TAG    "Jian_nanoDet_JNI"
 #define  LOGI(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
@@ -24,6 +25,31 @@ struct object_rect {
     int width;
     int height;
 };
+
+float cal_iou(object_rect box1, object_rect box2) {
+    float ratio = 0.f;
+
+    // compute the area size
+    auto s1 = box1.height * box1.width;
+    auto s2 = box2.height * box2.width;
+
+    // compute the union box
+    auto left = std::max(box1.x, box2.x);
+    auto top = std::max(box1.y, box2.y);
+    auto right = std::min(box1.x + box1.width, box2.x + box2.width);
+    auto bottom = std::min(box1.y + box1.height, box2.y + box2.height);
+
+    // compute the box width and height
+    auto union_w = std::max(0, right - left);
+    auto union_h = std::max(0, bottom - top);
+
+    // compute the union size
+    auto union_size = union_w * union_h;
+    // compute the appended region size
+    auto total_size = s1 + s2 - union_size;
+    ratio = 1.0f * union_size / total_size;
+    return ratio;
+}
 
 int resize_uniform(cv::Mat &src, cv::Mat &dst, cv::Size dst_size, object_rect &effect_area) {
     int w = src.cols;
@@ -89,14 +115,16 @@ void draw_bboxes(const cv::Mat &image, const std::vector<BoxInfo> &bboxes, objec
     float width_ratio = (float) src_w / (float) dst_w;
     float height_ratio = (float) src_h / (float) dst_h;
 
-    for (const auto & box : bboxes) {
+    for (const auto &box: bboxes) {
         cv::Scalar color = cv::Scalar(color_list[box.label][0], color_list[box.label][1],
                                       color_list[box.label][2]);
 
-        cv::rectangle(image, cv::Rect(cv::Point(int((box.x1 - (float)effect_roi.x) * width_ratio),
-                                                int((box.y1 - (float)effect_roi.y) * height_ratio)),
-                                      cv::Point(int((box.x2 - (float)effect_roi.x) * width_ratio),
-                                                    int((box.y2 - (float)effect_roi.y) * height_ratio))), color);
+        cv::rectangle(image, cv::Rect(cv::Point(int((box.x1 - (float) effect_roi.x) * width_ratio),
+                                                int((box.y1 - (float) effect_roi.y) *
+                                                    height_ratio)),
+                                      cv::Point(int((box.x2 - (float) effect_roi.x) * width_ratio),
+                                                int((box.y2 - (float) effect_roi.y) *
+                                                    height_ratio))), color);
 
         char text[256];
         sprintf(text, "%s %.1f%%", class_names[box.label], box.score * 100);
@@ -104,8 +132,9 @@ void draw_bboxes(const cv::Mat &image, const std::vector<BoxInfo> &bboxes, objec
         int baseLine = 0;
         cv::Size label_size = cv::getTextSize(text, cv::FONT_HERSHEY_SIMPLEX, 0.4, 1, &baseLine);
 
-        int x = (int)((box.x1 - (float)effect_roi.x) * width_ratio);
-        int y = (int)((box.y1 - (float)effect_roi.y) * height_ratio) - label_size.height - baseLine;
+        int x = (int) ((box.x1 - (float) effect_roi.x) * width_ratio);
+        int y = (int) ((box.y1 - (float) effect_roi.y) * height_ratio) - label_size.height -
+                baseLine;
         if (y < 0)
             y = 0;
         if (x + label_size.width > image.cols)
@@ -119,8 +148,8 @@ void draw_bboxes(const cv::Mat &image, const std::vector<BoxInfo> &bboxes, objec
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_fatfish_chengjian_utils_JNIManager_nanoDetDoor_1Init(JNIEnv *env, jobject thiz,
-                                                          jstring modelParamPath,
-                                                          jstring modelBinPath) {
+                                                              jstring modelParamPath,
+                                                              jstring modelBinPath) {
 
     LOGI("entering %s", __FUNCTION__);
     const char *paramPath = strdup(env->GetStringUTFChars(modelParamPath, nullptr));
@@ -132,7 +161,7 @@ Java_com_fatfish_chengjian_utils_JNIManager_nanoDetDoor_1Init(JNIEnv *env, jobje
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_fatfish_chengjian_utils_JNIManager_nanoDetDoor_1Detect(JNIEnv *env, jobject thiz,
-                                                            jobject inputBitmap) {
+                                                                jobject inputBitmap) {
     LOGI("entering %s", __FUNCTION__);
     uint32_t *_inputBitmap;
     AndroidBitmapInfo bmapInfo;
@@ -147,7 +176,7 @@ Java_com_fatfish_chengjian_utils_JNIManager_nanoDetDoor_1Detect(JNIEnv *env, job
     int model_height = NanoDet::detector->input_size[0];
     int model_width = NanoDet::detector->input_size[1];
 
-    Mat image = Mat((int)height, (int)width, CV_8UC4);
+    Mat image = Mat((int) height, (int) width, CV_8UC4);
     image.data = imagePtr;
 
     Mat tmpMat;

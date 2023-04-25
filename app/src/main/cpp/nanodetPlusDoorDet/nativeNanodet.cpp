@@ -26,30 +26,6 @@ struct object_rect {
     int height;
 };
 
-float cal_iou(object_rect box1, object_rect box2) {
-    float ratio = 0.f;
-
-    // compute the area size
-    auto s1 = box1.height * box1.width;
-    auto s2 = box2.height * box2.width;
-
-    // compute the union box
-    auto left = std::max(box1.x, box2.x);
-    auto top = std::max(box1.y, box2.y);
-    auto right = std::min(box1.x + box1.width, box2.x + box2.width);
-    auto bottom = std::min(box1.y + box1.height, box2.y + box2.height);
-
-    // compute the box width and height
-    auto union_w = std::max(0, right - left);
-    auto union_h = std::max(0, bottom - top);
-
-    // compute the union size
-    auto union_size = union_w * union_h;
-    // compute the appended region size
-    auto total_size = s1 + s2 - union_size;
-    ratio = 1.0f * union_size / total_size;
-    return ratio;
-}
 
 int resize_uniform(cv::Mat &src, cv::Mat &dst, cv::Size dst_size, object_rect &effect_area) {
     int w = src.cols;

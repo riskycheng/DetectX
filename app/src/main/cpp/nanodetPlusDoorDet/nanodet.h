@@ -8,7 +8,9 @@
 
 #include <opencv2/core/core.hpp>
 #include <net.h>
-
+#define  LOG_TAG    "Jian_nanoDet_JNI"
+#define  LOGI(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
+#define  LOGE(...)  __android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__)
 typedef struct HeadInfo
 {
     std::string cls_layer;

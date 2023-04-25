@@ -8,9 +8,9 @@
 static const char *class_names[] = {
         "door_close", "door_open"
 };
-const int color_list[80][3] =
+const int color_list[2][4] =
         {
-                {255, 0,  0},
-                {0, 255, 0}
+                {0, 255,  0},
+                {255, 0,  0}
         };
 #endif //DETECTX_CLASSNAMESCOLORS_H

@@ -93,14 +93,14 @@ void draw_bboxes(const cv::Mat &image, const std::vector<BoxInfo> &bboxes, objec
 
     for (const auto &box: bboxes) {
         cv::Scalar color = cv::Scalar(color_list[box.label][0], color_list[box.label][1],
-                                      color_list[box.label][2]);
+                                      color_list[box.label][2], 255);
 
         cv::rectangle(image, cv::Rect(cv::Point(int((box.x1 - (float) effect_roi.x) * width_ratio),
                                                 int((box.y1 - (float) effect_roi.y) *
                                                     height_ratio)),
                                       cv::Point(int((box.x2 - (float) effect_roi.x) * width_ratio),
                                                 int((box.y2 - (float) effect_roi.y) *
-                                                    height_ratio))), color);
+                                                    height_ratio))), color, 2);
 
         char text[256];
         sprintf(text, "%s %.1f%%", class_names[box.label], box.score * 100);
@@ -117,7 +117,7 @@ void draw_bboxes(const cv::Mat &image, const std::vector<BoxInfo> &bboxes, objec
             x = image.cols - label_size.width;
 
         cv::putText(image, text, cv::Point(x, y + label_size.height),
-                    cv::FONT_HERSHEY_SIMPLEX, 0.4, color);
+                    cv::FONT_HERSHEY_SIMPLEX, 0.8, color, 2);
     }
 }
 

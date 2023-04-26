@@ -210,7 +210,7 @@ std::vector<BoxInfo> NanoDet::detect(cv::Mat image, float score_threshold, float
         }
     }
 
-    std::vector<BoxInfo> refinedBoxes = mergeDecision(dets, 0.35f, 0.6f);
+    std::vector<BoxInfo> refinedBoxes = mergeDecision(dets, score_threshold, nms_threshold);
 
     //double end = ncnn::get_current_time();
     //double time = end - start;

@@ -11,34 +11,38 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Size;
+import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import com.fatfish.chengjian.analyzer.MobileSSDAnalyzer;
 import com.fatfish.chengjian.analyzer.NanodetPlusAnalyzer;
 import com.fatfish.chengjian.analyzer.NanodetPlusDoorAnalyzer;
 import com.fatfish.chengjian.analyzer.NanodetPlusLeafAnalyzer;
 import com.fatfish.chengjian.analyzer.UpdateUICallback;
+import com.fatfish.chengjian.analyzer.UpdateUICallbackDoor;
 import com.fatfish.chengjian.utils.GlobalConstants;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-public class MainActivity extends AppCompatActivity implements UpdateUICallback {
+public class MainActivity extends AppCompatActivity implements UpdateUICallback, UpdateUICallbackDoor {
     private final static String TAG = GlobalConstants.JAVA_LOG_PREFIX + MainActivity.class.getSimpleName();
     private ImageView mImageViewDisplay;
     private Camera mCamera;
-
     private MobileSSDAnalyzer mobileSSDAnalyzer;
     private NanodetPlusAnalyzer nanodetPlusAnalyzer;
     private NanodetPlusLeafAnalyzer nanodetPlusLeafAnalyzer;
     private NanodetPlusDoorAnalyzer nanodetPlusDoorAnalyzer;
+    private LinearLayout mLinearLayoutWarningBox;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mImageViewDisplay = findViewById(R.id.previewView_Frame);
+        mLinearLayoutWarningBox = findViewById(R.id.warningBox);
         //build the any of the following analyzer
         mobileSSDAnalyzer = new MobileSSDAnalyzer(this);
         mobileSSDAnalyzer.setUpdateUICallback(this);
@@ -99,6 +103,18 @@ public class MainActivity extends AppCompatActivity implements UpdateUICallback 
         runOnUiThread(() -> {
             Log.d(TAG, "got result from analyzer...");
             mImageViewDisplay.setImageBitmap(resBitmap);
+        });
+    }
+
+    @Override
+    public void onPostAnyDoorOpen(boolean anyDoorOpen) {
+        runOnUiThread(() -> {
+            Log.d(TAG, "got result from analyzer for onPostAnyDoorOpen:" + anyDoorOpen);
+            if (anyDoorOpen) {
+                mLinearLayoutWarningBox.setVisibility(View.VISIBLE);
+            } else {
+                mLinearLayoutWarningBox.setVisibility(View.INVISIBLE);
+            }
         });
     }
 }

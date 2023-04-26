@@ -15,10 +15,10 @@ import com.fatfish.chengjian.utils.LocalUtils;
 public class NanodetPlusDoorAnalyzer implements ImageAnalysis.Analyzer {
     private final static String TAG = NanodetPlusDoorAnalyzer.class.getSimpleName();
     private Context mContext;
-    private UpdateUICallback mUpdateUICallback;
+    private UpdateUICallbackDoor mUpdateUICallback;
     private JNIManager mJNIManager;
 
-    public void setUpdateUICallback(UpdateUICallback updateUICallback) {
+    public void setUpdateUICallback(UpdateUICallbackDoor updateUICallback) {
         mUpdateUICallback = updateUICallback;
     }
 
@@ -42,8 +42,10 @@ public class NanodetPlusDoorAnalyzer implements ImageAnalysis.Analyzer {
 
 //        bitmap = LocalUtils.rotateBitmap(bitmap, 90); // no need to perform rotation
 
-        mJNIManager.nanoDetDoor_Detect(bitmap);
+        boolean anyDoorOpen = mJNIManager.nanoDetDoor_Detect(bitmap);
 
         mUpdateUICallback.onAnalysisDone(bitmap);
+
+        mUpdateUICallback.onPostAnyDoorOpen(anyDoorOpen);
     }
 }

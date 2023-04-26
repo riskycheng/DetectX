@@ -18,6 +18,7 @@ using namespace cv;
 #define  LOGI(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
 #define  LOGE(...)  __android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__)
 
+#define SHOW_DETECTION_RES
 
 struct object_rect {
     int x;
@@ -135,7 +136,7 @@ Java_com_fatfish_chengjian_utils_JNIManager_nanoDetDoor_1Init(JNIEnv *env, jobje
     LOGI("exiting %s", __FUNCTION__);
 }
 extern "C"
-JNIEXPORT void JNICALL
+JNIEXPORT jboolean JNICALL
 Java_com_fatfish_chengjian_utils_JNIManager_nanoDetDoor_1Detect(JNIEnv *env, jobject thiz,
                                                                 jobject inputBitmap) {
     LOGI("entering %s", __FUNCTION__);
@@ -163,8 +164,21 @@ Java_com_fatfish_chengjian_utils_JNIManager_nanoDetDoor_1Detect(JNIEnv *env, job
     resize_uniform(tmpMat, resized_img, cv::Size(model_width, model_height), effect_roi);
     auto results = NanoDet::detector->detect(resized_img, 0.4, 0.5);
 
+    // check the refined result table, if there is any 'open' item, then return dangerous signal
+    bool anyDoorOpen = false;
+    for(auto &item : results)
+    {
+        if (item.label == 1)
+        {
+            anyDoorOpen = true;
+            break;
+        }
+    }
+#ifdef SHOW_DETECTION_RES
     draw_bboxes(image, results, effect_roi);
+#endif
     AndroidBitmap_unlockPixels(env, inputBitmap);
     tmpMat.release();
     LOGI("exiting %s", __FUNCTION__);
+    return anyDoorOpen;
 }

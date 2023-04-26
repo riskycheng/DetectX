@@ -57,6 +57,6 @@ public class JNIManager {
     public native void nanoDetLeaf_Detect(Bitmap bitmap);
 
     public native void nanoDetDoor_Init(String modelParamPath, String modelBinPath);
-    public native void nanoDetDoor_Detect(Bitmap bitmap);
+    public native boolean nanoDetDoor_Detect(Bitmap bitmap);
 
 }

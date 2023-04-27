@@ -9,6 +9,7 @@ import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.ImageProxy;
 
 import com.fatfish.chengjian.detectx.App;
+import com.fatfish.chengjian.utils.BoxInfo;
 import com.fatfish.chengjian.utils.JNIManager;
 import com.fatfish.chengjian.utils.LocalUtils;
 
@@ -25,15 +26,13 @@ public class NanodetPlusDoorAnalyzer implements ImageAnalysis.Analyzer {
     public NanodetPlusDoorAnalyzer(@NonNull Context context) {
         mContext = context;
         mJNIManager = JNIManager.getInstance();
-        mJNIManager.nanoDetDoor_Init(App.NANODET_PLUS_DOOR_PARAM_PATH,
-                App.NANODET_PLUS_DOOR_BIN_PATH);
+        mJNIManager.nanoDetDoor_Init(App.NANODET_PLUS_DOOR_PARAM_PATH, App.NANODET_PLUS_DOOR_BIN_PATH);
     }
 
     @Override
     public void analyze(@NonNull ImageProxy image) {
         Bitmap bitmap = null;
-        Log.d(TAG, "dim : " + image.getWidth() + "," + image.getHeight() + " @ "
-                + " image-format : " + image.getFormat());
+        Log.d(TAG, "dim : " + image.getWidth() + "," + image.getHeight() + " @ " + " image-format : " + image.getFormat());
         //todo reuse the bitmap
         bitmap = LocalUtils.YUV_420_888_toRGB(mContext, image, image.getWidth(), image.getHeight());
 
@@ -42,10 +41,19 @@ public class NanodetPlusDoorAnalyzer implements ImageAnalysis.Analyzer {
 
 //        bitmap = LocalUtils.rotateBitmap(bitmap, 90); // no need to perform rotation
 
-        boolean anyDoorOpen = mJNIManager.nanoDetDoor_Detect(bitmap);
+        BoxInfo[] detectedBoxes = mJNIManager.nanoDetDoor_Detect(bitmap);
 
         mUpdateUICallback.onAnalysisDone(bitmap);
 
+        boolean anyDoorOpen = false;
+        if (detectedBoxes != null) {
+            for (BoxInfo box : detectedBoxes) {
+                if (box.getLabel() == 1) {
+                    anyDoorOpen = true;
+                    break;
+                }
+            }
+        }
         mUpdateUICallback.onPostAnyDoorOpen(anyDoorOpen);
     }
 }

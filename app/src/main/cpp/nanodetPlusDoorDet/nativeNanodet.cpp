@@ -19,6 +19,13 @@ using namespace cv;
 #define  LOGE(...)  __android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__)
 
 #define SHOW_DETECTION_RES
+jclass jcls_BoxInfo = nullptr;
+jfieldID jfieldId_BoxInfo_x = nullptr;
+jfieldID jfieldId_BoxInfo_y = nullptr;
+jfieldID jfieldId_BoxInfo_width = nullptr;
+jfieldID jfieldId_BoxInfo_height = nullptr;
+jfieldID jfieldId_BoxInfo_label = nullptr;
+jfieldID jfieldId_BoxInfo_confidence = nullptr;
 
 struct object_rect {
     int x;
@@ -133,10 +140,12 @@ Java_com_fatfish_chengjian_utils_JNIManager_nanoDetDoor_1Init(JNIEnv *env, jobje
     const char *binPath = strdup(env->GetStringUTFChars(modelBinPath, nullptr));
     LOGI("loading from %s, %s", paramPath, binPath);
     NanoDet::detector = new NanoDet(paramPath, binPath, false);
+
+
     LOGI("exiting %s", __FUNCTION__);
 }
 extern "C"
-JNIEXPORT jboolean JNICALL
+JNIEXPORT jobjectArray JNICALL
 Java_com_fatfish_chengjian_utils_JNIManager_nanoDetDoor_1Detect(JNIEnv *env, jobject thiz,
                                                                 jobject inputBitmap) {
     LOGI("entering %s", __FUNCTION__);
@@ -166,19 +175,49 @@ Java_com_fatfish_chengjian_utils_JNIManager_nanoDetDoor_1Detect(JNIEnv *env, job
 
     // check the refined result table, if there is any 'open' item, then return dangerous signal
     bool anyDoorOpen = false;
-    for(auto &item : results)
-    {
-        if (item.label == 1)
-        {
-            anyDoorOpen = true;
-            break;
-        }
+    int boxesCnt = results.size();
+
+    // initialize the reflection items
+    jcls_BoxInfo = env->FindClass("com/fatfish/chengjian/utils/BoxInfo");
+    if (jcls_BoxInfo == nullptr) {
+        LOGE("failed to parse the Java class BoxInfo!");
     }
+    jfieldId_BoxInfo_x = env->GetFieldID(jcls_BoxInfo, "x", "I");
+    jfieldId_BoxInfo_y = env->GetFieldID(jcls_BoxInfo, "y", "I");
+    jfieldId_BoxInfo_width = env->GetFieldID(jcls_BoxInfo, "width", "I");
+    jfieldId_BoxInfo_height = env->GetFieldID(jcls_BoxInfo, "height", "I");
+    jfieldId_BoxInfo_label = env->GetFieldID(jcls_BoxInfo, "label", "I");
+    jfieldId_BoxInfo_confidence = env->GetFieldID(jcls_BoxInfo, "confidence", "F");
+
+    if (boxesCnt > 0) {
+        jobjectArray boxes = env->NewObjectArray(boxesCnt, jcls_BoxInfo, nullptr);
+        for (auto &item: results) {
+            int index = 0;
+            if (item.label == 1) {
+                anyDoorOpen = true;
+            }
+
+            // create the local jObject and append to the list
+            jmethodID constructor_boxInfo = env->GetMethodID(jcls_BoxInfo, "<init>", "()V");
+            jobject obj_boxInfo = env->NewObject(jcls_BoxInfo, constructor_boxInfo);
+            env->SetIntField(obj_boxInfo, jfieldId_BoxInfo_x, (jint) item.x1);
+            env->SetIntField(obj_boxInfo, jfieldId_BoxInfo_y, (jint) item.y1);
+            env->SetIntField(obj_boxInfo, jfieldId_BoxInfo_width, (jint) (item.x2 - item.x1));
+            env->SetIntField(obj_boxInfo, jfieldId_BoxInfo_height, (jint) (item.y2 - item.y1));
+            env->SetIntField(obj_boxInfo, jfieldId_BoxInfo_label, (jint) item.label);
+            env->SetFloatField(obj_boxInfo, jfieldId_BoxInfo_confidence, item.score);
+            env->SetObjectArrayElement(boxes, index++, obj_boxInfo);
+        }
 #ifdef SHOW_DETECTION_RES
-    draw_bboxes(image, results, effect_roi);
+        draw_bboxes(image, results, effect_roi);
 #endif
+        AndroidBitmap_unlockPixels(env, inputBitmap);
+        tmpMat.release();
+        return boxes;
+    }
+
     AndroidBitmap_unlockPixels(env, inputBitmap);
     tmpMat.release();
     LOGI("exiting %s", __FUNCTION__);
-    return anyDoorOpen;
+    return nullptr;
 }

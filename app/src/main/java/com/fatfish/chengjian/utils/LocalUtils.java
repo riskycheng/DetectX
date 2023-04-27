@@ -301,15 +301,15 @@ public class LocalUtils {
         if (files.length == 0) {
             isSuccess = CopyAssetsFile(context, src, des);
             if (!isSuccess)
-                return isSuccess;
+                return false;
         } else {
-            File srcfile = new File(des + "/" + src);
-            if (!srcfile.exists()) {
-                if (srcfile.mkdir()) {//对于目录自行创建
+            File srcFile = new File(des + "/" + src);
+            if (!srcFile.exists()) {
+                if (srcFile.mkdir()) {//对于目录自行创建
                     for (int i = 0; i < files.length; i++) {
                         isSuccess = CopyAssetsDir(context, src + "/" + files[i], des);
                         if (!isSuccess)
-                            return isSuccess;
+                            return false;
                     }
                 } else {
                     return false;
@@ -317,7 +317,7 @@ public class LocalUtils {
             }
 
         }
-        return isSuccess;
+        return true;
     }
 
     public static boolean checkFileExist(String filePath) {

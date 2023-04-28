@@ -177,19 +177,16 @@ Java_com_fatfish_chengjian_utils_JNIManager_nanoDetDoor_1Detect(JNIEnv *env, job
     bool anyDoorOpen = false;
     int boxesCnt = results.size();
 
-    // initialize the reflection items
-    jcls_BoxInfo = env->FindClass("com/fatfish/chengjian/utils/BoxInfo");
-    if (jcls_BoxInfo == nullptr) {
-        LOGE("failed to parse the Java class BoxInfo!");
-    }
-    jfieldId_BoxInfo_x = env->GetFieldID(jcls_BoxInfo, "x", "I");
-    jfieldId_BoxInfo_y = env->GetFieldID(jcls_BoxInfo, "y", "I");
-    jfieldId_BoxInfo_width = env->GetFieldID(jcls_BoxInfo, "width", "I");
-    jfieldId_BoxInfo_height = env->GetFieldID(jcls_BoxInfo, "height", "I");
-    jfieldId_BoxInfo_label = env->GetFieldID(jcls_BoxInfo, "label", "I");
-    jfieldId_BoxInfo_confidence = env->GetFieldID(jcls_BoxInfo, "confidence", "F");
-
     if (boxesCnt > 0) {
+        // initialize the reflection items
+        jcls_BoxInfo = env->FindClass("com/fatfish/chengjian/utils/BoxInfo");
+        jfieldId_BoxInfo_x = env->GetFieldID(jcls_BoxInfo, "x", "I");
+        jfieldId_BoxInfo_y = env->GetFieldID(jcls_BoxInfo, "y", "I");
+        jfieldId_BoxInfo_width = env->GetFieldID(jcls_BoxInfo, "width", "I");
+        jfieldId_BoxInfo_height = env->GetFieldID(jcls_BoxInfo, "height", "I");
+        jfieldId_BoxInfo_label = env->GetFieldID(jcls_BoxInfo, "label", "I");
+        jfieldId_BoxInfo_confidence = env->GetFieldID(jcls_BoxInfo, "confidence", "F");
+
         jobjectArray boxes = env->NewObjectArray(boxesCnt, jcls_BoxInfo, nullptr);
         for (auto &item: results) {
             int index = 0;
@@ -213,6 +210,9 @@ Java_com_fatfish_chengjian_utils_JNIManager_nanoDetDoor_1Detect(JNIEnv *env, job
 #endif
         AndroidBitmap_unlockPixels(env, inputBitmap);
         tmpMat.release();
+        // delete local reference
+        env->DeleteLocalRef(jcls_BoxInfo);
+
         return boxes;
     }
 

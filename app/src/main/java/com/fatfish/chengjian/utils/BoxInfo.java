@@ -1,6 +1,8 @@
 package com.fatfish.chengjian.utils;
 
-public class BoxInfo {
+import androidx.annotation.NonNull;
+
+public class BoxInfo implements Cloneable{
     private int x;
     private int y;
     private int width;
@@ -54,5 +56,18 @@ public class BoxInfo {
 
     public void setConfidence(float confidence) {
         this.confidence = confidence;
+    }
+
+    @NonNull
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        BoxInfo clone = (BoxInfo) super.clone();
+        clone.setX(this.x);
+        clone.setY(this.y);
+        clone.setWidth(this.width);
+        clone.setHeight(this.height);
+        clone.setLabel(this.label);
+        clone.setConfidence(this.confidence);
+        return clone;
     }
 }

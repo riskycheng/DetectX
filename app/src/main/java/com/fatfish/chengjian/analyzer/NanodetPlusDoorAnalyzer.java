@@ -41,19 +41,20 @@ public class NanodetPlusDoorAnalyzer implements ImageAnalysis.Analyzer {
 
 //        bitmap = LocalUtils.rotateBitmap(bitmap, 90); // no need to perform rotation
 
-        BoxInfo[] detectedBoxes = mJNIManager.nanoDetDoor_Detect(bitmap);
-
-        mUpdateUICallback.onAnalysisDone(bitmap);
+        BoxInfo[] detections = mJNIManager.nanoDetDoor_Detect(bitmap);
 
         boolean anyDoorOpen = false;
-        if (detectedBoxes != null) {
+        if (detections != null) {
+            BoxInfo[] detectedBoxes = detections.clone();
             for (BoxInfo box : detectedBoxes) {
+                if (box == null) continue;
                 if (box.getLabel() == 1) {
                     anyDoorOpen = true;
                     break;
                 }
             }
         }
+        mUpdateUICallback.onAnalysisDone(bitmap);
         mUpdateUICallback.onPostAnyDoorOpen(anyDoorOpen);
     }
 }

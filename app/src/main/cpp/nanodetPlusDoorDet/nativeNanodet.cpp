@@ -188,12 +188,8 @@ Java_com_fatfish_chengjian_utils_JNIManager_nanoDetDoor_1Detect(JNIEnv *env, job
         jfieldId_BoxInfo_confidence = env->GetFieldID(jcls_BoxInfo, "confidence", "F");
 
         jobjectArray boxes = env->NewObjectArray(boxesCnt, jcls_BoxInfo, nullptr);
+        int index = 0;
         for (auto &item: results) {
-            int index = 0;
-            if (item.label == 1) {
-                anyDoorOpen = true;
-            }
-
             // create the local jObject and append to the list
             jmethodID constructor_boxInfo = env->GetMethodID(jcls_BoxInfo, "<init>", "()V");
             jobject obj_boxInfo = env->NewObject(jcls_BoxInfo, constructor_boxInfo);

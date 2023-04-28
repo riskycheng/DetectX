@@ -7,7 +7,8 @@
 #include <benchmark.h>
 #include <vector>
 #include <algorithm>
- #include <iostream>
+#include <iostream>
+
 using namespace std;
 
 float cal_iou(BoxInfo box1, BoxInfo box2) {
@@ -39,8 +40,8 @@ float cal_iou(BoxInfo box1, BoxInfo box2) {
 }
 
 
-vector <BoxInfo> mergeDecision(vector <BoxInfo> detections, float score_thresh, float nms_thresh) {
-    vector <BoxInfo> all_box;
+vector<BoxInfo> mergeDecision(vector<BoxInfo> detections, float score_thresh, float nms_thresh) {
+    vector<BoxInfo> all_box;
     for (auto &box: detections) {
         auto score = box.score;
         if (score > score_thresh) {
@@ -61,16 +62,12 @@ vector <BoxInfo> mergeDecision(vector <BoxInfo> detections, float score_thresh, 
 
     std::vector<BoxInfo> refinedBoxes;
     int index_of_box_a = 0;
-    for(auto box_a : all_box)
-    {
-        for (auto box_b : all_box)
-        {
+    for (auto box_a: all_box) {
+        for (auto box_b: all_box) {
             auto iou = cal_iou(box_a, box_b);
-            if (box_a.label != box_b.label && iou >= nms_thresh)
-            {
+            if (box_a.label != box_b.label && iou >= nms_thresh) {
                 LOGI("merging performed !!!!!! overlapping detected \n");
-                if (box_a.label != 1)
-                {
+                if (box_a.label != 1) {
                     all_box[index_of_box_a].label = -1;
                 }
             }
@@ -79,10 +76,8 @@ vector <BoxInfo> mergeDecision(vector <BoxInfo> detections, float score_thresh, 
     }
 
     // check all the item
-    for (auto item : all_box)
-    {
-        if (item.label != -1)
-        {
+    for (auto item: all_box) {
+        if (item.label != -1) {
             refinedBoxes.push_back(item);
         }
     }
@@ -210,7 +205,7 @@ std::vector<BoxInfo> NanoDet::detect(cv::Mat image, float score_threshold, float
         }
     }
 
-    std::vector<BoxInfo> refinedBoxes = mergeDecision(dets, score_threshold, nms_threshold);
+    std::vector<BoxInfo> refinedBoxes = mergeDecision(dets, score_threshold, 0.05f); // no interaction at all
 
     //double end = ncnn::get_current_time();
     //double time = end - start;

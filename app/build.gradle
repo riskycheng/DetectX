@@ -49,6 +49,9 @@ android {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
     }
+    buildFeatures {
+        renderScript true
+    }
 }
 
 dependencies {

@@ -10,14 +10,19 @@ import androidx.camera.core.ImageProxy;
 
 import com.fatfish.chengjian.detectx.App;
 import com.fatfish.chengjian.utils.BoxInfo;
+import com.fatfish.chengjian.utils.DoorDetectionLogInstance;
 import com.fatfish.chengjian.utils.JNIManager;
 import com.fatfish.chengjian.utils.LocalUtils;
+
+import java.util.Vector;
 
 public class NanodetPlusDoorAnalyzer implements ImageAnalysis.Analyzer {
     private final static String TAG = NanodetPlusDoorAnalyzer.class.getSimpleName();
     private Context mContext;
     private UpdateUICallbackDoor mUpdateUICallback;
     private JNIManager mJNIManager;
+
+    private Vector<DoorDetectionLogInstance> mDoorDetectionLogInstances;
 
     public void setUpdateUICallback(UpdateUICallbackDoor updateUICallback) {
         mUpdateUICallback = updateUICallback;
@@ -27,6 +32,7 @@ public class NanodetPlusDoorAnalyzer implements ImageAnalysis.Analyzer {
         mContext = context;
         mJNIManager = JNIManager.getInstance();
         mJNIManager.nanoDetDoor_Init(App.NANODET_PLUS_DOOR_PARAM_PATH, App.NANODET_PLUS_DOOR_BIN_PATH);
+        mDoorDetectionLogInstances = new Vector<>();
     }
 
     @Override
@@ -41,19 +47,32 @@ public class NanodetPlusDoorAnalyzer implements ImageAnalysis.Analyzer {
 
 //        bitmap = LocalUtils.rotateBitmap(bitmap, 90); // no need to perform rotation
 
-        BoxInfo[] detections = mJNIManager.nanoDetDoor_Detect(bitmap);
-
+        BoxInfo[] detectedBoxes = mJNIManager.nanoDetDoor_Detect(bitmap).clone();
         boolean anyDoorOpen = false;
-        if (detections != null) {
-            BoxInfo[] detectedBoxes = detections.clone();
-            for (BoxInfo box : detectedBoxes) {
-                if (box == null) continue;
-                if (box.getLabel() == 1) {
-                    anyDoorOpen = true;
-                    break;
-                }
+        for (BoxInfo box : detectedBoxes) {
+            if (box == null) continue;
+            if (box.getLabel() == 1) {
+                anyDoorOpen = true;
+                break;
             }
         }
+
+        // update the results into the instance for every frame
+        DoorDetectionLogInstance doorDetectionLogInstance = new DoorDetectionLogInstance();
+        doorDetectionLogInstance.setDoors(detectedBoxes);
+        doorDetectionLogInstance.setAnyDoorOpen(anyDoorOpen);
+        if (anyDoorOpen) {
+            // save out the bitmap
+            long timeStamp = System.currentTimeMillis();
+            String imageName = "image_" + timeStamp + ".png";
+            LocalUtils.saveOutBitmap(imageName, bitmap);
+            doorDetectionLogInstance.setImagePath(imageName);
+            doorDetectionLogInstance.setTimeStamp(String.valueOf(timeStamp));
+        }
+        mDoorDetectionLogInstances.add(doorDetectionLogInstance);
+        LocalUtils.saveLogs(App.LAUNCH_TIME_STAMP + ".txt", mDoorDetectionLogInstances);
+        mDoorDetectionLogInstances.clear();
+
         mUpdateUICallback.onAnalysisDone(bitmap);
         mUpdateUICallback.onPostAnyDoorOpen(anyDoorOpen);
     }

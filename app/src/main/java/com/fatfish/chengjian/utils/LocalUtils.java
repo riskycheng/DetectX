@@ -5,6 +5,7 @@ import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.media.Image;
+import android.os.Environment;
 import android.renderscript.Allocation;
 import android.renderscript.Element;
 import android.renderscript.RenderScript;
@@ -14,11 +15,14 @@ import android.util.Log;
 
 import androidx.camera.core.ImageProxy;
 
+import com.fatfish.chengjian.detectx.App;
 import com.jian.yuv_utils.ScriptC_yuv420888;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -261,6 +265,42 @@ public class LocalUtils {
     }
 
 
+    public static boolean saveOutBitmap(String imageName, Bitmap bitmap) {
+        final String filePath = App.EXTERNAL_LOCATION_ROOT;
+        Log.d(TAG, "saving bitmap to : " + filePath);
+        try {
+            File dir = new File(filePath, "doorDetImages");
+            if (!dir.exists()) {
+                boolean res = dir.mkdir();
+                if (!res) {
+                    Log.e(TAG, "failed to create folder for saving out the images");
+                    return false;
+                } else {
+                    Log.d(TAG, "created the folder for saving out the images");
+                }
+            }
+            File f = new File(dir, imageName);
+            if (f.exists()) {
+                boolean result = f.delete();
+                if (result)
+                    Log.d(TAG, "old image deleted");
+                else
+                    Log.d(TAG, "savedPath not found, will save it here");
+            }
+            try {
+                FileOutputStream out = new FileOutputStream(f);
+                bitmap.compress(Bitmap.CompressFormat.PNG, 60, out);
+                out.flush();
+                out.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return true;
+    }
+
     public static Boolean CopyAssetsFile(Context context, String filename, String des) {
         Boolean isSuccess = true;
         AssetManager assetManager = context.getAssets();
@@ -329,5 +369,55 @@ public class LocalUtils {
         }
     }
 
+
+    public static boolean saveLogs(String logName, Vector<DoorDetectionLogInstance> doorInstances) {
+        final String filePath = App.EXTERNAL_LOCATION_ROOT;
+        FileWriter fw;
+        BufferedWriter bw = null;
+
+        try {
+            File dir = new File(filePath, "doorDetLogs");
+            if (!dir.exists()) {
+                boolean res = dir.mkdir();
+                if (!res) {
+                    Log.e(TAG, "failed to create folder for saving out the logs");
+                    return false;
+                } else {
+                    Log.d(TAG, "created the folder for saving out the logs");
+                }
+            }
+            File file = new File(dir, logName);
+            if (!file.exists()) {
+                boolean res = file.createNewFile();
+                if (!res) {
+                    Log.e(TAG, "failed to create log file for saving out the logs");
+                    return false;
+                } else {
+                    Log.d(TAG, "created the log file for saving out the logs");
+                }
+            }
+            // start writing out the log content
+            fw = new FileWriter(file, true);
+            bw = new BufferedWriter(fw);
+
+            for (DoorDetectionLogInstance door : doorInstances) {
+                bw.write(door.toString());
+                bw.write("\n");
+            }
+
+            bw.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (bw != null) {
+                try {
+                    bw.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return true;
+    }
 
 }

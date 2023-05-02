@@ -8,7 +8,7 @@ public class DoorDetectionLogInstance {
     private String timeStamp;
     private String imagePath;
     private Bitmap bitmap;
-    private Vector<BoxInfo> doors;
+    private BoxInfo[] doors;
     private boolean anyDoorOpen;
 
     public String getTimeStamp() {
@@ -35,11 +35,11 @@ public class DoorDetectionLogInstance {
         this.bitmap = bitmap;
     }
 
-    public Vector<BoxInfo> getDoors() {
+    public BoxInfo[] getDoors() {
         return doors;
     }
 
-    public void setDoors(Vector<BoxInfo> doors) {
+    public void setDoors(BoxInfo[] doors) {
         this.doors = doors;
     }
 
@@ -49,5 +49,21 @@ public class DoorDetectionLogInstance {
 
     public void setAnyDoorOpen(boolean anyDoorOpen) {
         this.anyDoorOpen = anyDoorOpen;
+    }
+
+
+    @Override
+    public String toString() {
+
+        StringBuilder doorsContent = new StringBuilder();
+        for (BoxInfo door : this.doors)
+            doorsContent.append(door.toString());
+
+        return "DoorDetectionLogInstance{" +
+                "timeStamp='" + timeStamp + '\'' +
+                ", imagePath='" + imagePath + '\'' +
+                ", doors='" + doorsContent + '\'' +
+                ", anyDoorOpen=" + anyDoorOpen +
+                '}';
     }
 }

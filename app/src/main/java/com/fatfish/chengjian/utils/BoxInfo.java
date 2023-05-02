@@ -70,4 +70,16 @@ public class BoxInfo implements Cloneable{
         clone.setConfidence(this.confidence);
         return clone;
     }
+
+    @Override
+    public String toString() {
+        return "BoxInfo{" +
+                "x=" + x +
+                ", y=" + y +
+                ", width=" + width +
+                ", height=" + height +
+                ", label=" + label +
+                ", confidence=" + confidence +
+                '}';
+    }
 }

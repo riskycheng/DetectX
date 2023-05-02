@@ -6,6 +6,9 @@ import android.os.Environment;
 public class App extends Application {
     //will be updated
     public static String EXTERNAL_LOCATION_ROOT = Environment.getExternalStorageDirectory().getPath() + "/DetectX";
+
+    public static String LAUNCH_TIME_STAMP = "";
+
     public static String MOBILESSD_MODEL_PATH = "";
     public static String MOBILESSD_WEIGHT_PATH = "";
     public static String NANODET_PLUS_PARAM_PATH = "";
@@ -34,5 +37,7 @@ public class App extends Application {
         // the model path for nanodet-plus-door
         NANODET_PLUS_DOOR_PARAM_PATH = EXTERNAL_LOCATION_ROOT + "/models/NanodetPlus_m416_doorDet/nanodet_door.param";
         NANODET_PLUS_DOOR_BIN_PATH = EXTERNAL_LOCATION_ROOT + "/models/NanodetPlus_m416_doorDet/nanodet_door.bin";
+
+        LAUNCH_TIME_STAMP = String.valueOf(System.currentTimeMillis());
     }
 }

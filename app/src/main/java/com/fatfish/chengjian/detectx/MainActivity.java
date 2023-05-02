@@ -37,6 +37,7 @@ public class MainActivity extends AppCompatActivity implements UpdateUICallback,
     private NanodetPlusDoorAnalyzer nanodetPlusDoorAnalyzer;
     private LinearLayout mLinearLayoutWarningBox;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements UpdateUICallback,
 
     public void setupCamera(ImageAnalysis.Analyzer analyzer) {
         final CameraSelector cameraSelector = new CameraSelector.Builder()
-                .requireLensFacing(CameraSelector.LENS_FACING_FRONT) // specially for the Logi camera RK3588
+                .requireLensFacing(CameraSelector.LENS_FACING_BACK) // specially for the Logi camera RK3588
                 .build();
         final ListenableFuture cameraProviderFuture = ProcessCameraProvider.getInstance(this);
         cameraProviderFuture.addListener(new Runnable() {

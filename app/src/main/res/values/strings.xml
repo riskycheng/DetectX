@@ -4,4 +4,6 @@
     <string name="slogon">Create for Fun!</string>
     <string name="start_copying_models">checking models…</string>
     <string name="finish_copying_models">finish copying models!</string>
+
+    <string name="settings">settings</string>
 </resources>

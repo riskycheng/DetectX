@@ -14,9 +14,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:screenOrientation="landscape"
             android:name=".MainActivity"
-            android:theme="@style/MyFullScreenTheme"></activity>
+            android:screenOrientation="landscape"
+            android:theme="@style/MyFullScreenTheme" />
         <activity
             android:name=".LauncherActivity"
             android:exported="true"
@@ -28,6 +28,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name="com.fatfish.chengjian.utils.PreferenceCfgActivity" android:theme="@style/AppTheme"/>
     </application>
 
 </manifest>

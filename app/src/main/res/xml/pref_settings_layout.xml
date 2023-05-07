@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <SwitchPreference
+        android:defaultValue="@bool/enable_logging_out_img_logs_default_value"
+        android:key="@string/enable_logging_out_img_logs_key"
+        android:title="@string/enable_logging_out_img_logs_title" />
+
+</PreferenceScreen>

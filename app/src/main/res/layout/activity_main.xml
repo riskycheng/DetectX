@@ -6,6 +6,13 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+    <ImageView
+        android:layout_margin="10dp"
+        android:layout_gravity="end|top"
+        android:id="@+id/imageview_setting"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="@drawable/settings_selector"/>
 
     <ImageView
         android:id="@+id/previewView_Frame"

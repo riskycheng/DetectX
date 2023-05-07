@@ -67,6 +67,9 @@ public class PreferenceCfgActivity extends AppCompatActivity {
             Context context = getActivity().getApplicationContext();
             if (key.equals(context.getString(R.string.enable_logging_out_img_logs_key))) {
                 setSummaryForEnableSaving();
+            } else if (key.equals(context.getString(R.string.camera_id_selection_title_key))) {
+                Log.d(TAG, "camera ID selection triggered");
+                setSummaryForCameraIdSelection();
             }
         }
 
@@ -84,6 +87,7 @@ public class PreferenceCfgActivity extends AppCompatActivity {
 
         private void setSummaries() {
             setSummaryForEnableSaving();
+            setSummaryForCameraIdSelection();
         }
 
 
@@ -96,11 +100,25 @@ public class PreferenceCfgActivity extends AppCompatActivity {
                 preference.setSummary("images won't be saved");
         }
 
+        private void setSummaryForCameraIdSelection() {
+            int value = getPref_cameraId(getContext());
+            Preference preference = findPreference(getContext().getResources().getString(R.string.camera_id_selection_title_key));
+            preference.setSummary("Selected Camera-ID:" + value);
+        }
+
         public boolean getPref_enableSaving(Context context) {
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
             String key = context.getResources().getString(R.string.enable_logging_out_img_logs_key);
             boolean defaultVal = context.getResources().getBoolean(R.bool.enable_logging_out_img_logs_default_value);
             return preferences.getBoolean(key, defaultVal);
+        }
+
+        public int getPref_cameraId(Context context) {
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+            String key = context.getResources().getString(R.string.camera_id_selection_title_key);
+            int defaultVal = Integer.parseInt(context.getResources().getString(R.string.camera_id_selection_default_value));
+            String value = preferences.getString(key, String.valueOf(defaultVal));
+            return Integer.parseInt(value);
         }
 
 

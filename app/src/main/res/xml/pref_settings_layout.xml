@@ -6,4 +6,11 @@
         android:key="@string/enable_logging_out_img_logs_key"
         android:title="@string/enable_logging_out_img_logs_title" />
 
+    <ListPreference
+        android:defaultValue="@string/camera_id_selection_default_value"
+        android:entries="@array/array_camera_ids"
+        android:entryValues="@array/array_camera_values"
+        android:key="@string/camera_id_selection_title_key"
+        android:title="@string/camera_id_selection_title" />
+
 </PreferenceScreen>

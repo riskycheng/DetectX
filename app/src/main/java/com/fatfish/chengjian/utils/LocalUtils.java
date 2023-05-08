@@ -265,7 +265,7 @@ public class LocalUtils {
     }
 
 
-    public static boolean saveOutBitmap(String imageName, Bitmap bitmap) {
+    public static boolean saveOutBitmap(String imageName, Bitmap bitmap, float scale, int quality) {
         final String filePath = App.EXTERNAL_LOCATION_ROOT;
         Log.d(TAG, "saving bitmap to : " + filePath);
         try {
@@ -289,7 +289,11 @@ public class LocalUtils {
             }
             try {
                 FileOutputStream out = new FileOutputStream(f);
-                bitmap.compress(Bitmap.CompressFormat.PNG, 60, out);
+                // first of all, resize it to smaller size
+                int targetHeight = (int) (bitmap.getHeight() * scale);
+                int targetWidth = (int) (bitmap.getWidth() * scale);
+                Bitmap resizedBitmap = resizeImage(bitmap, targetWidth, targetHeight);
+                resizedBitmap.compress(Bitmap.CompressFormat.PNG, quality, out);
                 out.flush();
                 out.close();
             } catch (IOException e) {

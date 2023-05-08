@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="enable_logging_out_img_logs_title">SAVE IMGs When Open-Door(s) Detected</string>
+    <string name="enable_logging_out_img_logs_key">pref_enable_saving</string>
+    <bool name="enable_logging_out_img_logs_default_value">true</bool>
+
+
+    <string name="camera_id_selection_title">Camera Selection</string>
+    <string name="camera_id_selection_title_key">pref_camera_id_selection</string>
+    <string name="camera_id_selection_default_value">0</string>
+    <string-array name="array_camera_ids">
+        <item>camera_frontal</item>
+        <item>camera_back</item>
+    </string-array>
+
+    <string-array name="array_camera_values">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+
+</resources>

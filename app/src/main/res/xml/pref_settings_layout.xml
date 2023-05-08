@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <SwitchPreference
+        android:defaultValue="@bool/enable_logging_out_img_logs_default_value"
+        android:key="@string/enable_logging_out_img_logs_key"
+        android:title="@string/enable_logging_out_img_logs_title" />
+
+    <ListPreference
+        android:defaultValue="@string/camera_id_selection_default_value"
+        android:entries="@array/array_camera_ids"
+        android:entryValues="@array/array_camera_values"
+        android:key="@string/camera_id_selection_title_key"
+        android:title="@string/camera_id_selection_title" />
+
+</PreferenceScreen>

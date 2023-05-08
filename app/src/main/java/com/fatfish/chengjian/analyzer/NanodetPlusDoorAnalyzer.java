@@ -47,32 +47,33 @@ public class NanodetPlusDoorAnalyzer implements ImageAnalysis.Analyzer {
 
 //        bitmap = LocalUtils.rotateBitmap(bitmap, 90); // no need to perform rotation
 
-        BoxInfo[] detectedBoxes = mJNIManager.nanoDetDoor_Detect(bitmap).clone();
+        BoxInfo[] detectedBoxes = mJNIManager.nanoDetDoor_Detect(bitmap);
         boolean anyDoorOpen = false;
-        for (BoxInfo box : detectedBoxes) {
-            if (box == null) continue;
-            if (box.getLabel() == 1) {
-                anyDoorOpen = true;
-                break;
+        if (detectedBoxes != null) {
+            for (BoxInfo box : detectedBoxes) {
+                if (box == null) continue;
+                if (box.getLabel() == 1) {
+                    anyDoorOpen = true;
+                    break;
+                }
             }
-        }
 
-        // update the results into the instance for every frame
-        DoorDetectionLogInstance doorDetectionLogInstance = new DoorDetectionLogInstance();
-        doorDetectionLogInstance.setDoors(detectedBoxes);
-        doorDetectionLogInstance.setAnyDoorOpen(anyDoorOpen);
-        if (anyDoorOpen) {
-            // save out the bitmap
-            long timeStamp = System.currentTimeMillis();
-            String imageName = "image_" + timeStamp + ".png";
-            LocalUtils.saveOutBitmap(imageName, bitmap);
-            doorDetectionLogInstance.setImagePath(imageName);
-            doorDetectionLogInstance.setTimeStamp(String.valueOf(timeStamp));
+            // update the results into the instance for every frame
+            DoorDetectionLogInstance doorDetectionLogInstance = new DoorDetectionLogInstance();
+            doorDetectionLogInstance.setDoors(detectedBoxes);
+            doorDetectionLogInstance.setAnyDoorOpen(anyDoorOpen);
+            if (anyDoorOpen) {
+                // save out the bitmap
+                long timeStamp = System.currentTimeMillis();
+                String imageName = "image_" + timeStamp + ".png";
+                LocalUtils.saveOutBitmap(imageName, bitmap, 0.2f, 20);
+                doorDetectionLogInstance.setImagePath(imageName);
+                doorDetectionLogInstance.setTimeStamp(String.valueOf(timeStamp));
+            }
+            mDoorDetectionLogInstances.add(doorDetectionLogInstance);
+            LocalUtils.saveLogs(App.LAUNCH_TIME_STAMP + ".txt", mDoorDetectionLogInstances);
+            mDoorDetectionLogInstances.clear();
         }
-        mDoorDetectionLogInstances.add(doorDetectionLogInstance);
-        LocalUtils.saveLogs(App.LAUNCH_TIME_STAMP + ".txt", mDoorDetectionLogInstances);
-        mDoorDetectionLogInstances.clear();
-
         mUpdateUICallback.onAnalysisDone(bitmap);
         mUpdateUICallback.onPostAnyDoorOpen(anyDoorOpen);
     }

@@ -7,6 +7,8 @@ import androidx.camera.core.ImageAnalysis;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.core.content.ContextCompat;
 
+import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
@@ -22,12 +24,13 @@ import com.fatfish.chengjian.analyzer.NanodetPlusLeafAnalyzer;
 import com.fatfish.chengjian.analyzer.UpdateUICallback;
 import com.fatfish.chengjian.analyzer.UpdateUICallbackDoor;
 import com.fatfish.chengjian.utils.GlobalConstants;
+import com.fatfish.chengjian.utils.PreferenceCfgActivity;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-public class MainActivity extends AppCompatActivity implements UpdateUICallback, UpdateUICallbackDoor {
+public class MainActivity extends AppCompatActivity implements UpdateUICallback, UpdateUICallbackDoor, View.OnClickListener {
     private final static String TAG = GlobalConstants.JAVA_LOG_PREFIX + MainActivity.class.getSimpleName();
     private ImageView mImageViewDisplay;
     private Camera mCamera;
@@ -37,6 +40,8 @@ public class MainActivity extends AppCompatActivity implements UpdateUICallback,
     private NanodetPlusDoorAnalyzer nanodetPlusDoorAnalyzer;
     private LinearLayout mLinearLayoutWarningBox;
 
+    private ImageView mImageview_settings;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +49,9 @@ public class MainActivity extends AppCompatActivity implements UpdateUICallback,
         setContentView(R.layout.activity_main);
         mImageViewDisplay = findViewById(R.id.previewView_Frame);
         mLinearLayoutWarningBox = findViewById(R.id.warningBox);
+        mImageview_settings = findViewById(R.id.imageview_setting);
+        mImageview_settings.setOnClickListener(this);
+
         //build the any of the following analyzer
         mobileSSDAnalyzer = new MobileSSDAnalyzer(this);
         mobileSSDAnalyzer.setUpdateUICallback(this);
@@ -117,5 +125,18 @@ public class MainActivity extends AppCompatActivity implements UpdateUICallback,
                 mLinearLayoutWarningBox.setVisibility(View.INVISIBLE);
             }
         });
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.imageview_setting:
+                Intent intent = new Intent(MainActivity.this, PreferenceCfgActivity.class);
+                startActivity(intent);
+                break;
+            default:
+                break;
+        }
     }
 }
